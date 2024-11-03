@@ -53,3 +53,15 @@ class LoggerPluginBase(ABC):
             Handler: The handler instance.
         """
         pass
+
+    @property
+    @abstractmethod
+    def outputs_to_stream(self) -> bool:
+        """
+        Indicates if this plugin outputs to stdout/stderr.
+        Used by Snakemake to determine to enable default stream logHandler.
+
+        Returns:
+            bool: True - outputs to stdout/stderr. False - Does not ouput to stdout/stderr.
+        """
+        pass
