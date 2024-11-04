@@ -15,6 +15,16 @@ class LoggerPluginBase(ABC):
     def __init__(
         self,
         settings: Optional[LoggerPluginSettingsBase],
+    ) -> None:
+        self.settings = settings
+        self.__post__init()
+
+    def __post__init(self) -> None:
+        pass
+
+    @abstractmethod
+    def create_handler(
+        self,
         quiet,
         printshellcmds: bool,
         printreason: bool,
@@ -25,43 +35,12 @@ class LoggerPluginBase(ABC):
         mode,
         show_failed_logs: bool,
         dryrun: bool,
-    ) -> None:
-        self.settings = settings
-        self.quiet = quiet
-        self.printshellcmds = printshellcmds
-        self.printreason = printreason
-        self.debug_dag = debug_dag
-        self.nocolor = nocolor
-        self.stdout = stdout
-        self.debug = debug
-        self.mode = mode
-        self.show_failed_logs = show_failed_logs
-        self.dryrun = dryrun
-
-        self.__post__init()
-
-    def __post__init(self) -> None:
-        pass
-
-    @abstractmethod
-    def create_handler(self) -> Handler:
+    ) -> Handler:
         """
         This function should be defined by the logging plugin and return an instance of a subclass of logging.Handler,
         with formatter and filter already set. If those are not set, then the Snakemake defaults will be used.
 
         Returns:
             Handler: The handler instance.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def outputs_to_stream(self) -> bool:
-        """
-        Indicates if this plugin outputs to stdout/stderr.
-        Used by Snakemake to determine to enable default stream logHandler.
-
-        Returns:
-            bool: True - outputs to stdout/stderr. False - Does not ouput to stdout/stderr.
         """
         pass
