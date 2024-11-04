@@ -1,8 +1,8 @@
 [project]
 name = "snakemake-interface-logger-plugins"
 version = "0.1.0"
-description = "Add your description here"
-authors = [{name = "Cade Mirchandani"}]
+description = "Logger plugin interface for snakemake"
+authors = [{name = "Cade Mirchandani"}, {name = "Christopher Tomkins-Tinch"}, {name = "Johannes Köster"}]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
