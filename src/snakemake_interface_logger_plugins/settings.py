@@ -20,3 +20,5 @@ class LoggerPluginSettingsBase(
     Logger plugins can define a subclass of this class,
     named 'LoggerSettings'.
     """
+
+    pass
