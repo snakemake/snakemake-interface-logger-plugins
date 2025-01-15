@@ -11,7 +11,7 @@ from snakemake_interface_logger_plugins.settings import LoggerPluginSettingsBase
 from logging import Handler
 
 
-class LoggerPluginBase(ABC):
+class LogHandlerBase(ABC):
     def __init__(
         self,
         settings: Optional[LoggerPluginSettingsBase],

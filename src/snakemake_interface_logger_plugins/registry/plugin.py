@@ -11,13 +11,14 @@ from snakemake_interface_logger_plugins.settings import (
     LoggerPluginSettingsBase,
 )
 from snakemake_interface_logger_plugins import common
+from snakemake_interface_logger_plugins.base import LogHandlerBase
 
 from snakemake_interface_common.plugin_registry.plugin import PluginBase
 
 
 @dataclass
 class Plugin(PluginBase):
-    logger_plugin: object
+    log_handler: LogHandlerBase
     _logger_settings_cls: Optional[Type[LoggerPluginSettingsBase]]
     _name: str
 
