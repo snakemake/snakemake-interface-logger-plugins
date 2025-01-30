@@ -20,7 +20,7 @@ from snakemake_interface_logger_plugins.registry.plugin import Plugin
 from snakemake_interface_common.plugin_registry import PluginRegistryBase
 from snakemake_interface_logger_plugins import common
 from snakemake_interface_logger_plugins.base import (
-    LoggerPluginBase,
+    LogHandlerBase,
 )
 
 
@@ -48,7 +48,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
                 kind=AttributeKind.CLASS,
             ),
             "LoggerPlugin": AttributeType(
-                cls=LoggerPluginBase,
+                cls=LogHandlerBase,
                 mode=AttributeMode.REQUIRED,
                 kind=AttributeKind.CLASS,
             ),
