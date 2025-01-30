@@ -5,8 +5,7 @@ __copyright__ = (
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 import snakemake_interface_common.plugin_registry.plugin
 
