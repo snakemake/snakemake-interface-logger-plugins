@@ -2,13 +2,25 @@
 name = "snakemake-interface-logger-plugins"
 version = "0.1.1"
 description = "Logger plugin interface for snakemake"
-authors = [{name = "Cade Mirchandani"}, {name = "Christopher Tomkins-Tinch"}, {name = "Johannes Köster"}]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "snakemake-interface-common>=1.17.4",
+authors = [
+    { name = "Cade Mirchandani" },
+    { name = "Christopher Tomkins-Tinch" },
+    { name = "Johannes Köster" },
 ]
+readme = "README.md"
+requires-python = "<4.0,>=3.12"
+dependencies = ["snakemake-interface-common>=1.17.4"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["coverage>=7.6.10", "pytest>=8.3.4", "ruff>=0.9.4"]
+
+[tool.poetry]
+requires-poetry = ">=2.0"
+[tool.poetry.group.dev.dependencies]
+coverage = ">=7.6.10"
+pytest = ">=8.3.4"
+ruff = ">=0.9.4"
