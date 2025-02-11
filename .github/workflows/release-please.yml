@@ -11,7 +11,7 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
-      - uses: GoogleCloudPlatform/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release
         with:
           release-type: simple
@@ -41,7 +41,7 @@ jobs:
           poetry build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
@@ -55,7 +55,7 @@ jobs:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
