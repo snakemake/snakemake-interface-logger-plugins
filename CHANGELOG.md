@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.1.2...v0.1.3) (2025-02-11)
+
+
+### Bug Fixes
+
+* get release-please to run properly by updating GitHub Actions versions ([#5](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/5)) ([c26b9a3](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/c26b9a328cd3b5839f4fe18474b6595f6f1af955))
+* use release-please python ([#7](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/7)) ([2e1c9b2](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/2e1c9b2c2864d255d0181a575158b34204f875d9))
+
 ## [0.1.2](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/0.1.1...v0.1.2) (2025-02-11)
 
 
