@@ -5,9 +5,12 @@ __copyright__ = (
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import FrozenSet, Optional, Set, Union
 
 import snakemake_interface_common.plugin_registry.plugin
+from snakemake_interface_common.settings import SettingsEnumBase
 
 
 @dataclass
