@@ -1,7 +1,5 @@
-__author__ = "Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-__copyright__ = (
-    "Copyright 2024, Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-)
+__author__ = "Cade Mirchandani, Johannes Köster"
+__copyright__ = "Copyright 2024, Cade Mirchandani, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
@@ -20,4 +18,3 @@ class LogHandlerBase(Handler):
 
     def __post__init(self) -> None:
         pass
-
