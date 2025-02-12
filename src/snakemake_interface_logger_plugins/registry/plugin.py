@@ -1,25 +1,22 @@
-__author__ = "Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-__copyright__ = (
-    "Copyright 2024, Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-)
+__author__ = "Cade Mirchandani, Johannes Köster"
+__copyright__ = "Copyright 2024, Cade Mirchandani, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 from dataclasses import dataclass
 from typing import Optional, Type
 from snakemake_interface_logger_plugins.settings import (
-    LoggerPluginSettingsBase,
+    LogHandlerSettingsBase,
 )
 from snakemake_interface_logger_plugins import common
-from snakemake_interface_logger_plugins.base import LogHandlerBase
 
 from snakemake_interface_common.plugin_registry.plugin import PluginBase
 
 
 @dataclass
 class Plugin(PluginBase):
-    log_handler: LogHandlerBase
-    _logger_settings_cls: Optional[Type[LoggerPluginSettingsBase]]
+    log_handler: object
+    _logger_settings_cls: Optional[Type[LogHandlerSettingsBase]]
     _name: str
 
     @property

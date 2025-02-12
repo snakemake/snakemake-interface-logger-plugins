@@ -1,7 +1,5 @@
-__author__ = "Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-__copyright__ = (
-    "Copyright 2024, Cade Mirchandani, Christopher Tomkins-Tinch, Johannes Köster"
-)
+__author__ = "Cade Mirchandani, Johannes Köster"
+__copyright__ = "Copyright 2024, Cade Mirchandani, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
@@ -9,7 +7,7 @@ import types
 from typing import Mapping
 
 from snakemake_interface_logger_plugins.settings import (
-    LoggerPluginSettingsBase,
+    LogHandlerSettingsBase,
 )
 from snakemake_interface_common.plugin_registry.attribute_types import (
     AttributeKind,
@@ -37,13 +35,13 @@ class LoggerPluginRegistry(PluginRegistryBase):
         return Plugin(
             _name=name,
             logger_plugin=module.LoggerPlugin,
-            _logger_settings_cls=getattr(module, "LoggerPluginSettings", None),
+            _logger_settings_cls=getattr(module, "LogHandlerSettings", None),
         )
 
     def expected_attributes(self) -> Mapping[str, AttributeType]:
         return {
-            "LoggerPluginSettings": AttributeType(
-                cls=LoggerPluginSettingsBase,
+            "LogHandlerSettings": AttributeType(
+                cls=LogHandlerSettingsBase,
                 mode=AttributeMode.OPTIONAL,
                 kind=AttributeKind.CLASS,
             ),

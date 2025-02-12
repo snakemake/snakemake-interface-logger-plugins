@@ -8,7 +8,7 @@ authors = [
     { name = "Johannes Köster" },
 ]
 readme = "README.md"
-requires-python = "<4.0,>=3.12"
+requires-python = "<4.0,>=3.11"
 dependencies = ["snakemake-interface-common>=1.17.4"]
 
 [build-system]
