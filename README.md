@@ -1,11 +1,13 @@
 # Snakemake Logger Plugin Interface
 
-A base class for creating custom logging plugins for Snakemake.
+This package provides a stable interface for interactions between Snakemake and its logger plugins.
 
-## Usage
+Plugins should implement the following skeleton to comply with this interface.
+It is recommended to use Snakemake's poetry plugin to set up this skeleton (and automated testing) within a python package, see https://github.com/snakemake/poetry-snakemake-plugin.
 
-To use this base class, inherit from `LogHandlerBase` and implement the `create_handler` method. The handler should be fully configured with a formatter and filter, as Snakemake will apply its defaults if these are not provided.
+This interface is a work in progress and the skeleton code will be added below once the dust has settled.
 
-## License
+```python
 
-This project is licensed under the MIT License.
+
+```

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from logging import Handler
 from typing import Optional
 from dataclasses import dataclass, field
-from snakemake_interface_logger_plugins.settings import LoggerPluginSettingsBase
+from snakemake_interface_logger_plugins.settings import LogHandlerSettingsBase
 from snakemake_interface_logger_plugins.registry import (
     LoggerPluginRegistry,
     LogHandlerBase,
@@ -14,7 +14,7 @@ from snakemake_interface_logger_plugins.registry.plugin import Plugin
 
 
 @dataclass
-class MockSettings(LoggerPluginSettingsBase):
+class MockSettings(LogHandlerSettingsBase):
     """Mock settings for the logger plugin."""
 
     log_level: Optional[str] = field(
@@ -30,7 +30,7 @@ class MockSettings(LoggerPluginSettingsBase):
 class MockPlugin(LogHandlerBase):
     settings_cls = MockSettings  # Use our mock settings class
 
-    def __init__(self, settings: Optional[LoggerPluginSettingsBase] = None):
+    def __init__(self, settings: Optional[LogHandlerSettingsBase] = None):
         if settings is None:
             settings = MockSettings()  # Provide default mock settings
         super().__init__(settings)
@@ -83,7 +83,7 @@ class TestRegistry(TestRegistryBase):
         assert plugin.settings_cls is MockSettings  # Ensure settings class is correct
 
     def validate_settings(
-        self, settings: LoggerPluginSettingsBase, plugin: LogHandlerBase
+        self, settings: LogHandlerSettingsBase, plugin: LogHandlerBase
     ):
         assert isinstance(settings, MockSettings)
         assert settings.log_level == "info"
