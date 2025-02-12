@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.1.3...v0.2.0) (2025-02-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* API simplification ([#9](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/9))
+
+### Features
+
+* API simplification ([#9](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/9)) ([977fb94](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/977fb946adcb42c9cb6a57f3891a56ebb166ad67))
+
+
+### Miscellaneous Chores
+
+* Release 0.2.0 ([31c6530](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/31c653060363826f0335ead90c8432aaa9397117))
+
 ## [0.1.3](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.1.2...v0.1.3) (2025-02-11)
 
 
