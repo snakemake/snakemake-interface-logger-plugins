@@ -34,7 +34,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
 
         return Plugin(
             _name=name,
-            logger_plugin=module.LoggerPlugin,
+            log_handler=module.LoggerPlugin,
             _logger_settings_cls=getattr(module, "LogHandlerSettings", None),
         )
 
