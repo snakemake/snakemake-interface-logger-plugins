@@ -23,7 +23,7 @@ from snakemake_interface_logger_plugins.base import (
 
 
 class LoggerPluginRegistry(PluginRegistryBase):
-    """This class is a singleton that holds all registered executor plugins."""
+    """This class is a singleton that holds all registered logger plugins."""
 
     @property
     def module_prefix(self) -> str:
@@ -34,7 +34,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
 
         return Plugin(
             _name=name,
-            logger_plugin=module.LoggerPlugin,
+            log_handler=module.LogHandler,
             _logger_settings_cls=getattr(module, "LogHandlerSettings", None),
         )
 
@@ -45,7 +45,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
                 mode=AttributeMode.OPTIONAL,
                 kind=AttributeKind.CLASS,
             ),
-            "LoggerPlugin": AttributeType(
+            "LogHandler": AttributeType(
                 cls=LogHandlerBase,
                 mode=AttributeMode.REQUIRED,
                 kind=AttributeKind.CLASS,
