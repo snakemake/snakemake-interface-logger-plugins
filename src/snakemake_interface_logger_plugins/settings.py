@@ -8,6 +8,21 @@ from dataclasses import dataclass
 import snakemake_interface_common.plugin_registry.plugin
 
 
+from abc import ABC
+from typing import Optional, Sequence
+
+
+class LoggerSettingsInterface(ABC):
+    printshellcmds: bool
+    nocolor: bool
+    quiet: Optional[Sequence]
+    debug_dag: bool
+    verbose: bool
+    show_failed_logs: bool
+    stdout: bool
+    dryrun: bool
+
+
 @dataclass
 class LogHandlerSettingsBase(
     snakemake_interface_common.plugin_registry.plugin.SettingsBase
