@@ -6,7 +6,7 @@ __license__ = "MIT"
 from typing import Optional
 from snakemake_interface_logger_plugins.settings import (
     LogHandlerSettingsBase,
-    LoggerSettingsInterface,
+    OutputSettingsLoggerInterface,
 )
 from abc import ABC, abstractmethod
 from logging import Handler
@@ -15,7 +15,7 @@ from logging import Handler
 class LogHandlerBase(ABC, Handler):
     def __init__(
         self,
-        common_settings: LoggerSettingsInterface,
+        common_settings: OutputSettingsLoggerInterface,
         settings: Optional[LogHandlerSettingsBase],
     ) -> None:
         self.common_settings = common_settings

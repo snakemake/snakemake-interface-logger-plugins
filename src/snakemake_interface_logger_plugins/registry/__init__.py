@@ -34,7 +34,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
 
         return Plugin(
             _name=name,
-            log_handler=module.LoggerPlugin,
+            log_handler=module.LogHandler,
             _logger_settings_cls=getattr(module, "LogHandlerSettings", None),
         )
 
@@ -45,7 +45,7 @@ class LoggerPluginRegistry(PluginRegistryBase):
                 mode=AttributeMode.OPTIONAL,
                 kind=AttributeKind.CLASS,
             ),
-            "LoggerPlugin": AttributeType(
+            "LogHandler": AttributeType(
                 cls=LogHandlerBase,
                 mode=AttributeMode.REQUIRED,
                 kind=AttributeKind.CLASS,

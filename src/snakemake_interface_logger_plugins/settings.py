@@ -12,7 +12,7 @@ from abc import ABC
 from typing import Optional, Sequence
 
 
-class LoggerSettingsInterface(ABC):
+class OutputSettingsLoggerInterface(ABC):
     printshellcmds: bool
     nocolor: bool
     quiet: Optional[Sequence]
