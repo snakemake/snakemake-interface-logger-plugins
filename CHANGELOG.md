@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.2.0...v0.3.0) (2025-02-18)
+
+
+### Features
+
+* add OutputSettingsLoggerInterface and abstract methods to LogHandlerBase ([#11](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/11)) ([f659f82](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/f659f82d461f9d1972ce9b56e4325564a4dd6e8c))
+
 ## [0.2.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.1.3...v0.2.0) (2025-02-12)
 
 
