@@ -20,11 +20,11 @@ class LogHandlerBase(ABC, Handler):
     ) -> None:
         self.common_settings = common_settings
         self.settings = settings
-        self.__post__init__()
+        self.__post_init__()
         if self.writes_to_stream and self.writes_to_file:
             raise ValueError("A handler cannot write to both stream and file")
 
-    def __post__init__(self) -> None:
+    def __post_init__(self) -> None:
         pass
 
     @property
