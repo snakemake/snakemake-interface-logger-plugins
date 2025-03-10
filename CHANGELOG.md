@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.3.0...v1.0.0) (2025-03-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* :pencil2: fix typo in post init ([#13](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/13))
+
+### Features
+
+* add logevent to common ([#14](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/14)) ([5593a4e](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/5593a4e9dde5522c34d18657f4752cc49ab6a6c1))
+
+
+### Code Refactoring
+
+* :pencil2: fix typo in post init ([#13](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/13)) ([1d6e966](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/1d6e966a0aa009b3a8f72592d022689bf76f95d0))
+
 ## [0.3.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.2.0...v0.3.0) (2025-02-18)
 
 
