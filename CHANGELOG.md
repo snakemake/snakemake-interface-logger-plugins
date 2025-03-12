@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.0.0...v1.1.0) (2025-03-12)
+
+
+### Features
+
+* add rulegraph property and event, add error event ([#16](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/16)) ([f63bc86](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/f63bc86f454a333b4bc64739f6c58841c9f6bbb3))
+
 ## [1.0.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v0.3.0...v1.0.0) (2025-03-10)
 
 
