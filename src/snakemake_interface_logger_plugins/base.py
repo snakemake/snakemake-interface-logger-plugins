@@ -54,3 +54,10 @@ class LogHandlerBase(ABC, Handler):
         """
         Whether this plugin attaches its own formatter
         """
+
+    @property
+    @abstractmethod
+    def needs_rulegraph(self) -> bool:
+        """
+        Whether this plugin requires the DAG rulegraph.
+        """

@@ -40,3 +40,5 @@ class LogEvent(StrEnum):
     RESOURCES_INFO = auto()
     DEBUG_DAG = auto()
     PROGRESS = auto()
+    RULEGRAPH = auto()
+    ERROR = auto()
