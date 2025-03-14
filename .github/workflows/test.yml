@@ -28,24 +28,19 @@ jobs:
           cache: true
 
       - name: Ruff Format
-        continue-on-error: true
         run: |
-          pixi run --environment dev format --check
+          pixi run --environment dev format --check || echo "Ruff Format failed" && false
 
       - name: Ruff lint
-        continue-on-error: true
         run: |
-          pixi run --environment dev lint --diff
+          pixi run --environment dev lint --diff || echo "Ruff lint failed" && false
 
       - name: Mypy
-        continue-on-error: true
         run: |
-          pixi run --environment dev type-check
+          pixi run --environment dev type-check || echo "Mypy failed" && false
 
       - name: Collect QC
-        if: success()
-        run: |
-          echo "All quality control checks passed"
+        run: echo "All quality control checks passed"
 
   testing:
     runs-on: ubuntu-latest
@@ -58,8 +53,6 @@ jobs:
           environments: dev
           pixi-version: v0.42.1
           cache: true
-      
+
       - name: Run tests
         run: pixi run --environment dev test --show-capture=all -s -vv
-
-
