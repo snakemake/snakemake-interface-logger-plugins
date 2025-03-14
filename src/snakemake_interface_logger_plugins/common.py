@@ -11,7 +11,7 @@ try:
 except ImportError:
     from enum import Enum, auto
 
-    class StrEnum(str, Enum):
+    class StrEnum(str, Enum):  # type: ignore
         """
         StrEnum implementation for Python < 3.11
         """

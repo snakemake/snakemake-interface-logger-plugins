@@ -34,6 +34,9 @@ pytest-cov = ">=6.0.0,<7"
 [tool.pixi.feature.dev.pypi-dependencies]
 snakemake-interface-common = { git = "https://github.com/snakemake/snakemake-interface-common.git" }
 
+[tool.mypy]
+ignore_missing_imports = true # Temporary until https://github.com/snakemake/snakemake-interface-common/pull/55
+
 [tool.pixi.feature.dev.tasks]
 format = "ruff format src"
 lint = "ruff check"
