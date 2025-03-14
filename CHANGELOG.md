@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.1.0...v1.2.0) (2025-03-14)
+
+
+### Features
+
+* add pixi config  ([#18](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/18)) ([a365379](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/a365379a813a19e89cae4a69f734760a0308617b))
+
 ## [1.1.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.0.0...v1.1.0) (2025-03-12)
 
 
