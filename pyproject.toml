@@ -15,12 +15,36 @@ dependencies = ["snakemake-interface-common>=1.17.4"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[dependency-groups]
-dev = ["coverage>=7.6.10", "pytest>=8.3.4", "ruff>=0.9.4"]
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
 
-[tool.poetry]
-requires-poetry = ">=2.0"
-[tool.poetry.group.dev.dependencies]
-coverage = ">=7.6.10"
-pytest = ">=8.3.4"
-ruff = ">=0.9.4"
+[tool.pixi.pypi-dependencies]
+snakemake-interface-logger-plugins = { path = ".", editable = true }
+
+[tool.pixi.environments]
+dev = { features = ["dev"] }
+
+[tool.pixi.feature.dev.dependencies]
+pytest = ">=8.3.5,<9"
+ruff = ">=0.10.0,<0.11"
+mypy = ">=1.15.0,<2"
+pytest-cov = ">=6.0.0,<7"
+
+[tool.pixi.feature.dev.pypi-dependencies]
+snakemake-interface-common = { git = "https://github.com/snakemake/snakemake-interface-common.git" }
+
+[tool.pixi.feature.dev.tasks]
+format = "ruff format src"
+lint = "ruff check"
+type-check = "mypy src/"
+qc = { depends-on = ["format", "lint", "type-check"] }
+
+[tool.pixi.feature.dev.tasks.test]
+cmd = [
+  "pytest",
+  "--cov=snakemake_interface_logger_plugins",
+  "--cov-report=xml:coverage-report/coverage.xml",
+  "--cov-report=term-missing",
+  "tests/tests.py"
+]
