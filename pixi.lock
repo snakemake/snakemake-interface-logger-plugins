@@ -854,7 +854,7 @@ packages:
 - pypi: .
   name: snakemake-interface-logger-plugins
   version: 1.1.0
-  sha256: b7559be649a932babc35ed4b8170f450142918ef30ca33b6e4d302a298e428b2
+  sha256: 4345654dc9be7cdcbadee0f7444f818848136a4ea6bf56d2e6f2d6049dbfc506
   requires_dist:
   - snakemake-interface-common>=1.17.4
   requires_python: '>=3.11,<4.0'
