@@ -28,14 +28,17 @@ jobs:
           cache: true
 
       - name: Ruff Format
+        if: always()
         run: |
           pixi run --environment dev format --check || echo "Ruff Format failed" && false
 
       - name: Ruff lint
+        if: always()
         run: |
           pixi run --environment dev lint --diff || echo "Ruff lint failed" && false
 
       - name: Mypy
+        if: always()
         run: |
           pixi run --environment dev type-check || echo "Mypy failed" && false
 
@@ -53,6 +56,8 @@ jobs:
           environments: dev
           pixi-version: v0.42.1
           cache: true
-
+      
       - name: Run tests
         run: pixi run --environment dev test --show-capture=all -s -vv
+
+
