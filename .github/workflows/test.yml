@@ -30,17 +30,16 @@ jobs:
       - name: Ruff Format
         if: always()
         run: |
-          pixi run --environment dev format --check || echo "Ruff Format failed" && false
+          pixi run --environment dev format --check
 
       - name: Ruff lint
         if: always()
         run: |
-          pixi run --environment dev lint --diff || echo "Ruff lint failed" && false
-
+          pixi run --environment dev lint --diff
       - name: Mypy
         if: always()
         run: |
-          pixi run --environment dev type-check || echo "Mypy failed" && false
+          pixi run --environment dev type-check
 
       - name: Collect QC
         run: echo "All quality control checks passed"
@@ -56,8 +55,6 @@ jobs:
           environments: dev
           pixi-version: v0.42.1
           cache: true
-      
+
       - name: Run tests
         run: pixi run --environment dev test --show-capture=all -s -vv
-
-
