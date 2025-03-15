@@ -16,10 +16,14 @@ jobs:
         with:
           release-type: python
 
-  setup_and_build:
+  publish-pypi:
     runs-on: ubuntu-latest
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
+    environment:
+      name: release
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -30,29 +34,9 @@ jobs:
           pixi-version: v0.42.1
 
       - name: Build source and wheel distribution + check build
+        # this will build the source and wheel into the dist/ directory
         run: |
           pixi run --environment publish check-build
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-  pypi_publish:
-    name: Upload release to PyPI
-    needs: [release-please, setup_and_build]
-    runs-on: ubuntu-latest
-    environment:
-      name: release
-    permissions:
-      id-token: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
