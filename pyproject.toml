@@ -1,6 +1,6 @@
 [project]
 name = "snakemake-interface-logger-plugins"
-version = "1.2.0"
+version = "1.2.1"
 description = "Logger plugin interface for snakemake"
 authors = [
     { name = "Cade Mirchandani" },
