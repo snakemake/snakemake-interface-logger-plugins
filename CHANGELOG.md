@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.0...v1.2.1) (2025-03-16)
+
+
+### Bug Fixes
+
+* force release-please ([#21](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/21)) ([a6570a3](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/a6570a384d18eeebe64bbf0388aa33a72b643faf))
+
 ## [1.2.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.1.0...v1.2.0) (2025-03-14)
 
 
