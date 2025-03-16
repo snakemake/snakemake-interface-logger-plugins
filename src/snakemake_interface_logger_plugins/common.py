@@ -2,10 +2,10 @@ __author__ = "Cade Mirchandani, Johannes Köster"
 __copyright__ = "Copyright 2024, Cade Mirchandani, Johannes Köster"
 __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
+from typing import Any, List
 
 logger_plugin_prefix = "snakemake-logger-plugin-"
 logger_plugin_module_prefix = logger_plugin_prefix.replace("-", "_")
-
 try:
     from enum import StrEnum, auto
 except ImportError:
@@ -16,13 +16,16 @@ except ImportError:
         StrEnum implementation for Python < 3.11
         """
 
-        def _generate_next_value_(name, start, count, last_values):
+        @staticmethod
+        def _generate_next_value_(
+            name: str, start: int, count: int, last_values: List[Any]
+        ) -> Any:
             return name.lower()
 
-        def __str__(self):
+        def __str__(self) -> str:
             return self.value
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return self.value
 
 
