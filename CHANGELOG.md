@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.1...v1.2.2) (2025-03-17)
+
+
+### Bug Fixes
+
+* remove lockfile, update gha  ([#23](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/23)) ([03f23f5](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/03f23f52dfe41b79dbf24dc386ca417a0519bded))
+
 ## [1.2.1](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.0...v1.2.1) (2025-03-16)
 
 
