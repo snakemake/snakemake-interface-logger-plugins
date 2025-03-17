@@ -56,3 +56,9 @@ jobs:
 
       - name: Run tests
         run: pixi run --environment dev test --show-capture=all -s -vv
+      
+      - name: Upload lockfile as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pixi lockfile
+          path: pixi.lock
