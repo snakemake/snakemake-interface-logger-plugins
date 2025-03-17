@@ -56,12 +56,12 @@ jobs:
 
       - name: Run tests
         run: pixi run --environment dev test --show-capture=all -s -vv
-      
+
       - name: Upload lockfile as artifact
         uses: actions/upload-artifact@v4
         id: upload-artifact
         with:
-          name: pixi.lock-testing_${{ github.ref_name}}
+          name: pixi.lock.testing-${{ github.run_number }}
           path: pixi.lock
           retention-days: 1
           overwrite: true
