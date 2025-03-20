@@ -1,6 +1,6 @@
 [project]
 name = "snakemake-interface-logger-plugins"
-version = "1.2.0"
+version = "1.2.2"
 description = "Logger plugin interface for snakemake"
 authors = [
     { name = "Cade Mirchandani" },
@@ -24,6 +24,7 @@ snakemake-interface-logger-plugins = { path = ".", editable = true }
 
 [tool.pixi.environments]
 dev = { features = ["dev"] }
+publish = { features = ["publish"] }
 
 [tool.pixi.feature.dev.dependencies]
 pytest = ">=8.3.5,<9"
@@ -36,6 +37,8 @@ snakemake-interface-common = { git = "https://github.com/snakemake/snakemake-int
 
 [tool.mypy]
 ignore_missing_imports = true # Temporary until https://github.com/snakemake/snakemake-interface-common/pull/55
+disallow_untyped_defs = true
+warn_no_return = true
 
 [tool.pixi.feature.dev.tasks]
 format = "ruff format src"
@@ -51,3 +54,15 @@ cmd = [
   "--cov-report=term-missing",
   "tests/tests.py"
 ]
+
+
+# Publish
+[tool.pixi.feature.publish.dependencies]
+twine = ">=6.1.0,<7"
+python-build = ">=1.2.2,<2"
+
+[tool.pixi.feature.publish.tasks]
+build = { cmd = "python -m build", description = "Build the package into the dist/ directory" }
+check-build = { cmd = "python -m twine check dist/*", depends-on = [
+  "build",
+], description = "Check that the package can be uploaded" }
