@@ -201,105 +201,77 @@ class LogHandler(LogHandlerBase):
 
 ## Available Log Events
 
-The `LogEvent` enum defines particularly important Snakemake events such as workflow starting, job submission, job failure, etc. Below are the available events and the fields you can typically expect in `LogRecord` objects for each event type. **Note: These field lists are guidelines only and may change between versions. Always use defensive programming practices like `getattr()` with defaults or `hasattr()` checks when accessing fields.**
+The `LogEvent` enum defines particularly important Snakemake events such as workflow starting, job submission, job failure, etc.  
+For each event, a corresponding dataclass is defined in `snakemake_interface_logger_plugins.events`.  
+These dataclasses provide a typed interface for accessing event-specific fields from a `LogRecord`.
 
-### Event Types and Typical Available Fields
+**To extract event data from a `LogRecord`, use the appropriate dataclass's `from_record()` method.**
 
-**`LogEvent.ERROR`**
-- `exception: Optional[str]` - Exception type
-- `location: Optional[str]` - Location where error occurred
-- `rule: Optional[str]` - Rule name associated with error
-- `traceback: Optional[str]` - Full traceback
-- `file: Optional[str]` - File where error occurred
-- `line: Optional[str]` - Line number where error occurred
+### Event Types, Dataclasses, and Typical Fields
 
-**`LogEvent.WORKFLOW_STARTED`**
-- `workflow_id: uuid.UUID` - Unique workflow identifier
-- `snakefile: Optional[str]` - Path to the Snakefile
+| LogEvent                    | Dataclass         | Typical Fields (see class for details)                                                                               |
+| --------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `LogEvent.ERROR`            | `Error`           | exception, location, rule, traceback, file, line                                                                     |
+| `LogEvent.WORKFLOW_STARTED` | `WorkflowStarted` | workflow_id, snakefile                                                                                               |
+| `LogEvent.JOB_INFO`         | `JobInfo`         | jobid, rule_name, threads, input, output, log, benchmark, rule_msg, wildcards, reason, shellcmd, priority, resources |
+| `LogEvent.JOB_STARTED`      | `JobStarted`      | job_ids                                                                                                              |
+| `LogEvent.JOB_FINISHED`     | `JobFinished`     | job_id                                                                                                               |
+| `LogEvent.SHELLCMD`         | `ShellCmd`        | jobid, shellcmd, rule_name                                                                                           |
+| `LogEvent.JOB_ERROR`        | `JobError`        | jobid                                                                                                                |
+| `LogEvent.GROUP_INFO`       | `GroupInfo`       | group_id, jobs                                                                                                       |
+| `LogEvent.GROUP_ERROR`      | `GroupError`      | groupid, aux_logs, job_error_info                                                                                    |
+| `LogEvent.RESOURCES_INFO`   | `ResourcesInfo`   | nodes, cores, provided_resources                                                                                     |
+| `LogEvent.DEBUG_DAG`        | `DebugDag`        | status, job, file, exception                                                                                         |
+| `LogEvent.PROGRESS`         | `Progress`        | done, total                                                                                                          |
+| `LogEvent.RULEGRAPH`        | `RuleGraph`       | rulegraph                                                                                                            |
+| `LogEvent.RUN_INFO`         | `RunInfo`         | per_rule_job_counts, total_job_count                                                                                 |
 
-**`LogEvent.JOB_INFO`**
-- `jobid: int` - Job identifier
-- `rule_name: str` - Name of the rule
-- `threads: int` - Number of threads allocated
-- `input: Optional[List[str]]` - Input files
-- `output: Optional[List[str]]` - Output files
-- `log: Optional[List[str]]` - Log files
-- `benchmark: Optional[List[str]]` - Benchmark files
-- `rule_msg: Optional[str]` - Rule message
-- `wildcards: Optional[Dict[str, Any]]` - Wildcard values
-- `reason: Optional[str]` - Reason for job execution
-- `shellcmd: Optional[str]` - Shell command to execute
-- `priority: Optional[int]` - Job priority
-- `resources: Optional[Dict[str, Any]]` - Resource requirements
+**Note:** These field lists are guidelines only and may change between versions.  
+Always use defensive programming practices like `getattr()` with defaults or `hasattr()` checks when accessing fields.
 
-**`LogEvent.JOB_STARTED`**
-- `job_ids: List[int]` - List of job IDs that started
-
-**`LogEvent.JOB_FINISHED`**
-- `job_id: int` - ID of the finished job
-
-**`LogEvent.SHELLCMD`**
-- `jobid: int` - Job identifier
-- `shellcmd: Optional[str]` - Shell command being executed
-- `rule_name: Optional[str]` - Name of the rule
-
-**`LogEvent.JOB_ERROR`**
-- `jobid: int` - ID of the job that failed
-
-**`LogEvent.GROUP_INFO`**
-- `group_id: int` - Group identifier
-- `jobs: List[Any]` - Jobs in the group
-
-**`LogEvent.GROUP_ERROR`**
-- `groupid: int` - Group identifier
-- `aux_logs: List[Any]` - Auxiliary log information
-- `job_error_info: Dict[str, Any]` - Job error details
-
-**`LogEvent.RESOURCES_INFO`**
-- `nodes: Optional[List[str]]` - Available nodes
-- `cores: Optional[int]` - Available cores
-- `provided_resources: Optional[Dict[str, Any]]` - Provided resources
-
-**`LogEvent.DEBUG_DAG`**
-- `status: Optional[str]` - DAG status
-- `job: Optional[Any]` - Job information
-- `file: Optional[str]` - Related file
-- `exception: Optional[str]` - Exception information
-
-**`LogEvent.PROGRESS`**
-- `done: int` - Number of completed jobs
-- `total: int` - Total number of jobs
-
-**`LogEvent.RULEGRAPH`**
-- `rulegraph: Dict[str, Any]` - Rule graph data structure
-
-**`LogEvent.RUN_INFO`**
-- `per_rule_job_counts: Dict[str, int]` - Job count per rule
-- `total_job_count: int` - Total number of jobs
-
-### Accessing Event Fields
-
-You can filter for specific events and access their fields in your `emit()` method:
+#### Example: Selecting the Right Dataclass for a LogRecord
 
 ```python
-def emit(self, record):
-    if hasattr(record, 'event'):
-        if record.event == LogEvent.JOB_ERROR:
-            # Access job error fields
-            jobid = getattr(record, 'jobid', 0)
-            # Handle job errors
-            pass
-        elif record.event == LogEvent.JOB_FINISHED:
-            # Access job completion fields
-            job_id = getattr(record, 'job_id', 0)
-            # Handle job completion
-            pass
-        elif record.event == LogEvent.PROGRESS:
-            # Access progress fields
-            done = getattr(record, 'done', 0)
-            total = getattr(record, 'total', 0)
-            # Handle progress updates
-            pass
-```
+from snakemake_interface_logger_plugins.common import LogEvent
+from snakemake_interface_logger_plugins import events
 
-Always use `getattr(record, 'field_name', default_value)` or check with `hasattr(record, 'field_name')` before accessing fields, as not all fields may be present in every record.
+def parse_event(record):
+    if not hasattr(record, "event"):
+        return None
+
+    event = record.event
+
+    # Map LogEvent to the corresponding dataclass
+    event_map = {
+        LogEvent.ERROR: events.Error,
+        LogEvent.WORKFLOW_STARTED: events.WorkflowStarted,
+        LogEvent.JOB_INFO: events.JobInfo,
+        LogEvent.JOB_STARTED: events.JobStarted,
+        LogEvent.JOB_FINISHED: events.JobFinished,
+        LogEvent.SHELLCMD: events.ShellCmd,
+        LogEvent.JOB_ERROR: events.JobError,
+        LogEvent.GROUP_INFO: events.GroupInfo,
+        LogEvent.GROUP_ERROR: events.GroupError,
+        LogEvent.RESOURCES_INFO: events.ResourcesInfo,
+        LogEvent.DEBUG_DAG: events.DebugDag,
+        LogEvent.PROGRESS: events.Progress,
+        LogEvent.RULEGRAPH: events.RuleGraph,
+        LogEvent.RUN_INFO: events.RunInfo,
+    }
+
+    dataclass_type = event_map.get(event)
+    if dataclass_type is not None:
+        return dataclass_type.from_record(record)
+    else:
+        return None
+
+# Usage in a log handler:
+def emit(self, record):
+    event_data = parse_event(record)
+    if event_data:
+        # Now you can access event-specific fields, e.g.:
+        if isinstance(event_data, events.JobError):
+            print(f"Job error for jobid: {event_data.jobid}")
+        elif isinstance(event_data, events.Progress):
+            print(f"Progress: {event_data.done}/{event_data.total}")
+```
