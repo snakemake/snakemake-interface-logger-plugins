@@ -18,6 +18,7 @@ class LogHandlerBase(ABC, Handler):
         common_settings: OutputSettingsLoggerInterface,
         settings: Optional[LogHandlerSettingsBase],
     ) -> None:
+        Handler.__init__(self)
         self.common_settings = common_settings
         self.settings = settings
         self.__post_init__()
