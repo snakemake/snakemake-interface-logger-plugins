@@ -53,20 +53,26 @@ class LogHandler(LogHandlerBase):
         # self.settings.
         # You also have access to self.common_settings here, which are logging settings supplied by the caller in the form of OutputSettingsLoggerInterface. # noqa: E501
         # See https://github.com/snakemake/snakemake-interface-logger-plugins/blob/main/src/snakemake_interface_logger_plugins/settings.py for more details # noqa: E501
-        
+
         # access settings attributes
-        self.settings 
+        self.settings
         self.common_settings
 
     # Here you can override logging.Handler methods to customize logging behavior.
-    # For example, you can override the emit() method to control how log records
-    # are processed and output. See the Python logging documentation for details:
+    # Only an implementation of the emit() method is required. See the Python logging
+    # documentation for details:
     # https://docs.python.org/3/library/logging.html#handler-objects
 
     # LogRecords from Snakemake carry contextual information in the record's attributes
     # Of particular interest is the 'event' attribute, which indicates the type of log information contained
     # See https://github.com/snakemake/snakemake-interface-logger-plugins/blob/2ab84cb31f0b92cf0b7ee3026e15d1209729d197/src/snakemake_interface_logger_plugins/common.py#L33 # noqa: E501
     # For examples on parsing LogRecords, see https://github.com/cademirch/snakemake-logger-plugin-snkmt/blob/main/src/snakemake_logger_plugin_snkmt/parsers.py # noqa: E501
+
+    def emit(self, record):
+        # Actually emit the record. Typically this will call self.format(record) to
+        # convert the record to a formatted string. The result could then be written to
+        # a stream or file.
+        ...
 
     @property
     def writes_to_stream(self) -> bool:
@@ -147,7 +153,7 @@ class LogHandler(LogHandlerBase):
     def __post_init__(self) -> None:
         super().__post_init__()
         self.console = Console()
-    
+
     def emit(self, record):
         # Access event type from record
         if hasattr(record, 'event') and record.event == LogEvent.JOB_ERROR:
@@ -155,7 +161,7 @@ class LogHandler(LogHandlerBase):
             if hasattr(record, 'name') and record.name in ['rule1', 'rule2']:
                 logfile = record.log[0] if hasattr(record, 'log') else None
                 output = record.output[0] if hasattr(record, 'output') else "unknown"
-                
+
                 # Use rich console for pretty printing
                 self.console.print(f"[red]Error in {output}. See {logfile}[/red]")
                 if logfile:

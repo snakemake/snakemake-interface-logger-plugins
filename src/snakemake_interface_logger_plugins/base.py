@@ -27,6 +27,13 @@ class LogHandlerBase(ABC, Handler):
     def __post_init__(self) -> None:
         pass
 
+    @abstractmethod
+    def emit(self, record: LogRecord) -> None:
+        """Actually log the given record.
+
+        This is called after the record has passed the handler's installed filter.
+        """
+
     @property
     @abstractmethod
     def writes_to_stream(self) -> bool:
