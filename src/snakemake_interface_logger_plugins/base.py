@@ -9,7 +9,7 @@ from snakemake_interface_logger_plugins.settings import (
     OutputSettingsLoggerInterface,
 )
 from abc import ABC, abstractmethod
-from logging import Handler
+from logging import Handler, LogRecord
 
 
 class LogHandlerBase(ABC, Handler):
