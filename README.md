@@ -86,6 +86,8 @@ class LogHandler(LogHandlerBase):
         # Whether this plugin writes to a file.
         # If your plugin writes log output to a file, return
         # true so that Snakemake can report your logfile path at workflow end.
+        # NOTE: Handlers that return True must provide a baseFilename attribute
+        # containing the file path. 
         ...
 
     @property
