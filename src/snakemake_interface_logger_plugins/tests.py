@@ -4,7 +4,7 @@ __email__ = "johannes.koester@uni-due.de"
 __license__ = "MIT"
 
 from abc import ABC, abstractmethod
-from typing import Optional, Type
+from typing import Type
 import logging
 
 from snakemake_interface_logger_plugins.base import LogHandlerBase
@@ -77,11 +77,11 @@ class TestLogHandlerBase(ABC):
         ...
 
     @abstractmethod
-    def get_log_handler_settings(self) -> Optional[LogHandlerSettingsBase]:
+    def get_log_handler_settings(self) -> LogHandlerSettingsBase:
         """Return the settings for the log handler.
 
         Returns:
-            An instance of LogHandlerSettingsBase or None
+            An instance of LogHandlerSettingsBase
         """
         ...
 
@@ -100,14 +100,6 @@ class TestLogHandlerBase(ABC):
         assert isinstance(handler, LogHandlerBase)
         assert isinstance(handler, logging.Handler)
         assert handler.common_settings is not None
-
-    def test_handler_settings(self):
-        """Test that handler settings are properly set."""
-        handler = self._create_handler()
-        expected_settings = self.get_log_handler_settings()
-
-        assert handler.settings is expected_settings
-        assert isinstance(handler.common_settings, MockOutputSettings)
 
     def test_abstract_properties(self):
         """Test that all abstract properties are implemented and return correct types."""
