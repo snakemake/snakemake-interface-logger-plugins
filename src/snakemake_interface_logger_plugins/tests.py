@@ -17,7 +17,7 @@ from snakemake_interface_logger_plugins.settings import (
 class MockOutputSettings(OutputSettingsLoggerInterface):
     """Mock implementation of OutputSettingsLoggerInterface for testing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.printshellcmds = True
         self.nocolor = False
         self.quiet = None
@@ -92,7 +92,7 @@ class TestLogHandlerBase(ABC):
         common_settings = MockOutputSettings()
         return handler_cls(common_settings=common_settings, settings=settings)
 
-    def test_handler_instantiation(self):
+    def test_handler_instantiation(self) -> None:
         """Test that the handler can be properly instantiated."""
         handler = self._create_handler()
 
@@ -101,7 +101,7 @@ class TestLogHandlerBase(ABC):
         assert isinstance(handler, logging.Handler)
         assert handler.common_settings is not None
 
-    def test_abstract_properties(self):
+    def test_abstract_properties(self) -> None:
         """Test that all abstract properties are implemented and return correct types."""
         handler = self._create_handler()
 
@@ -112,7 +112,7 @@ class TestLogHandlerBase(ABC):
         assert isinstance(handler.has_formatter, bool)
         assert isinstance(handler.needs_rulegraph, bool)
 
-    def test_stream_file_exclusivity(self):
+    def test_stream_file_exclusivity(self) -> None:
         """Test that handler cannot write to both stream and file."""
         handler = self._create_handler()
 
@@ -121,7 +121,7 @@ class TestLogHandlerBase(ABC):
             # This should have been caught during initialization
             assert False, "Handler cannot write to both stream and file"
 
-    def test_emit_method(self):
+    def test_emit_method(self) -> None:
         """Test that handler has a callable emit method."""
         handler = self._create_handler()
 
@@ -129,19 +129,19 @@ class TestLogHandlerBase(ABC):
         assert hasattr(handler, "emit")
         assert callable(handler.emit)
 
-    def test_basic_logging(self):
+    def test_basic_logging(self) -> None:
         """Test basic logging functionality."""
         handler = self._create_handler()
         self._test_basic_logging(handler)
 
-    def test_file_writing_capability(self):
+    def test_file_writing_capability(self) -> None:
         """Test file writing capability if enabled."""
         handler = self._create_handler()
 
         if handler.writes_to_file:
             self._test_file_writing(handler)
 
-    def _test_basic_logging(self, handler: LogHandlerBase):
+    def _test_basic_logging(self, handler: LogHandlerBase) -> None:
         """Test basic logging functionality."""
         # Create a simple log record
         record = logging.LogRecord(
@@ -160,7 +160,7 @@ class TestLogHandlerBase(ABC):
         except Exception as e:
             assert False, f"Handler emit method raised unexpected exception: {e}"
 
-    def _test_file_writing(self, handler: LogHandlerBase):
+    def _test_file_writing(self, handler: LogHandlerBase) -> None:
         """Test file writing capability if the handler writes to file."""
         # Handler should have baseFilename attribute when writes_to_file is True
         if not hasattr(handler, "baseFilename"):
