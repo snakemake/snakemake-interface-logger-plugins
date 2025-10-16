@@ -1,10 +1,31 @@
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, MISSING
 from logging import LogRecord
-from typing import Any, Dict, List, Optional, ClassVar, Self, Mapping
+from typing import Any, Dict, List, Optional, ClassVar, Self, Mapping, TypeVar
 from types import MappingProxyType
 
 from .common import LogEvent
+
+
+T = TypeVar("T")
+
+
+def _from_record_default(cls: type[T], record: LogRecord, **kw) -> T:
+    """Helper function to implement ``LogEventData.from_record()``.
+
+    Gets attribute values from ``record`` for all fields in dataclass ``cls`` and passes them to the
+    ``cls`` constructor. Behavior can be overridden for specific fields by passing their values
+    as keyword arguments.
+    """
+    for fld in fields(cls):
+        if fld.name in kw:
+            continue
+        if hasattr(record, fld.name):
+            kw[fld.name] = getattr(record, fld.name)
+        elif fld.default is MISSING and fld.default_factory is MISSING:
+            raise ValueError(f"LogRecord missing required attribute {fld.name!r}")
+
+    return cls(**kw)
 
 
 class LogEventData:
@@ -21,7 +42,11 @@ class LogEventData:
     @classmethod
     def from_record(cls, record: LogRecord) -> Self:
         """Create an instance from a LogRecord."""
-        raise NotImplementedError()
+        if cls is LogEventData:
+            raise TypeError(
+                f"{cls.__name__} is an abstract base class and cannot be instantiated."
+            )
+        return _from_record_default(cls, record)
 
 
 @dataclass
@@ -35,17 +60,6 @@ class Error(LogEventData):
     file: Optional[str] = None
     line: Optional[str] = None
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "Error":
-        return cls(
-            exception=getattr(record, "exception", None),
-            location=getattr(record, "location", None),
-            rule=getattr(record, "rule", None),
-            traceback=getattr(record, "traceback", None),
-            file=getattr(record, "file", None),
-            line=getattr(record, "line", None),
-        )
-
 
 @dataclass
 class WorkflowStarted(LogEventData):
@@ -54,20 +68,16 @@ class WorkflowStarted(LogEventData):
     workflow_id: uuid.UUID
     snakefile: Optional[str]
 
-    def __post_init__(self) -> None:
-        if not isinstance(self.snakefile, str):
+    @classmethod
+    def from_record(cls, record: LogRecord) -> Self:
+        snakefile = getattr(record, "snakefile", None)
+        if snakefile is not None:
             try:
                 # Try to convert to string - this should work for PosixPath and other path-like objects
-                self.snakefile = str(self.snakefile)
+                snakefile = str(snakefile)
             except (TypeError, ValueError) as e:
                 raise ValueError(f"Could not convert snakefile to string: {e}")
-
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "WorkflowStarted":
-        return cls(
-            workflow_id=getattr(record, "workflow_id"),
-            snakefile=getattr(record, "snakefile", None),
-        )
+        return _from_record_default(cls, record, snakefile=snakefile)
 
 
 @dataclass
@@ -89,7 +99,7 @@ class JobInfo(LogEventData):
     resources: Optional[Dict[str, Any]] = field(default_factory=dict)
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> "JobInfo":
+    def from_record(cls, record: LogRecord) -> Self:
         resources = {}
         if hasattr(record, "resources") and hasattr(record.resources, "_names"):  # type: ignore
             resources = {
@@ -98,21 +108,7 @@ class JobInfo(LogEventData):
                 if name not in {"_cores", "_nodes"}
             }
 
-        return cls(
-            jobid=getattr(record, "jobid", 0),
-            rule_name=getattr(record, "rule_name", ""),
-            threads=getattr(record, "threads", 1),
-            rule_msg=getattr(record, "rule_msg", None),
-            wildcards=getattr(record, "wildcards", {}),
-            reason=getattr(record, "reason", None),
-            shellcmd=getattr(record, "shellcmd", None),
-            priority=getattr(record, "priority", None),
-            input=getattr(record, "input", None),
-            log=getattr(record, "log", None),
-            output=getattr(record, "output", None),
-            benchmark=getattr(record, "benchmark", None),
-            resources=resources,
-        )
+        return _from_record_default(cls, record, resources=resources)
 
 
 @dataclass
@@ -122,7 +118,7 @@ class JobStarted(LogEventData):
     job_ids: List[int]
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> "JobStarted":
+    def from_record(cls, record: LogRecord) -> Self:
         jobs = getattr(record, "jobs", [])
 
         if jobs is None:
@@ -138,10 +134,6 @@ class JobFinished(LogEventData):
     event = LogEvent.JOB_FINISHED
 
     job_id: int
-
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "JobFinished":
-        return cls(job_id=getattr(record, "job_id"))
 
 
 @dataclass
@@ -167,12 +159,6 @@ class JobError(LogEventData):
 
     jobid: int
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "JobError":
-        return cls(
-            jobid=getattr(record, "jobid", 0),
-        )
-
 
 @dataclass
 class GroupInfo(LogEventData):
@@ -180,12 +166,6 @@ class GroupInfo(LogEventData):
 
     group_id: int
     jobs: List[Any] = field(default_factory=list)
-
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "GroupInfo":
-        return cls(
-            group_id=getattr(record, "group_id", 0), jobs=getattr(record, "jobs", [])
-        )
 
 
 @dataclass
@@ -196,14 +176,6 @@ class GroupError(LogEventData):
     aux_logs: List[Any] = field(default_factory=list)
     job_error_info: Dict[str, Any] = field(default_factory=dict)
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "GroupError":
-        return cls(
-            groupid=getattr(record, "groupid", 0),
-            aux_logs=getattr(record, "aux_logs", []),
-            job_error_info=getattr(record, "job_error_info", {}),
-        )
-
 
 @dataclass
 class ResourcesInfo(LogEventData):
@@ -212,17 +184,6 @@ class ResourcesInfo(LogEventData):
     nodes: Optional[List[str]] = None
     cores: Optional[int] = None
     provided_resources: Optional[Dict[str, Any]] = None
-
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "ResourcesInfo":
-        if hasattr(record, "nodes"):
-            return cls(nodes=record.nodes)  # type: ignore
-        elif hasattr(record, "cores"):
-            return cls(cores=record.cores)  # type: ignore
-        elif hasattr(record, "provided_resources"):
-            return cls(provided_resources=record.provided_resources)  # type: ignore
-        else:
-            return cls()
 
 
 @dataclass
@@ -234,15 +195,6 @@ class DebugDag(LogEventData):
     file: Optional[str] = None
     exception: Optional[str] = None
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "DebugDag":
-        return cls(
-            status=getattr(record, "status", None),
-            job=getattr(record, "job", None),
-            file=getattr(record, "file", None),
-            exception=getattr(record, "exception", None),
-        )
-
 
 @dataclass
 class Progress(LogEventData):
@@ -251,20 +203,12 @@ class Progress(LogEventData):
     done: int
     total: int
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "Progress":
-        return cls(done=getattr(record, "done", 0), total=getattr(record, "total", 0))
-
 
 @dataclass
 class RuleGraph(LogEventData):
     event = LogEvent.RULEGRAPH
 
     rulegraph: Dict[str, Any]
-
-    @classmethod
-    def from_record(cls, record: LogRecord) -> "RuleGraph":
-        return cls(rulegraph=getattr(record, "rulegraph", {}))
 
 
 @dataclass
