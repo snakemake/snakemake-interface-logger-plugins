@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from logging import Handler
 from typing import Optional
 from dataclasses import dataclass, field
+
 from snakemake_interface_logger_plugins.settings import LogHandlerSettingsBase
 from snakemake_interface_logger_plugins.registry import (
     LoggerPluginRegistry,
@@ -11,6 +12,7 @@ from snakemake_interface_logger_plugins.registry import (
 from snakemake_interface_common.plugin_registry.tests import TestRegistryBase
 from snakemake_interface_common.plugin_registry import PluginRegistryBase
 from snakemake_interface_logger_plugins.registry.plugin import Plugin
+from snakemake_interface_logger_plugins.common import LogEvent
 
 
 @dataclass
@@ -90,3 +92,13 @@ class TestRegistry(TestRegistryBase):
 
     def get_example_args(self):
         return ["--logger-rich-log-level", "info"]
+
+
+def test_log_event_mapping():
+    """Test that all LogEventData subclasses are registered in the mapping from LogEvent values."""
+
+    from snakemake_interface_logger_plugins.events import LOG_EVENT_CLASSES
+
+    assert LOG_EVENT_CLASSES.keys() == set(LogEvent)
+    for event, cls in LOG_EVENT_CLASSES.items():
+        assert cls.event is event

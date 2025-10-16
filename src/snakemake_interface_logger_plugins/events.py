@@ -1,11 +1,33 @@
 import uuid
 from dataclasses import dataclass, field
 from logging import LogRecord
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, ClassVar, Self, Mapping
+from types import MappingProxyType
+
+from .common import LogEvent
+
+
+class LogEventData:
+    """Data associated with a Snakemake log event.
+
+    Attributes
+    ----------
+    event
+        The type of log event (class attribute).
+    """
+
+    event: ClassVar[LogEvent]
+
+    @classmethod
+    def from_record(cls, record: LogRecord) -> Self:
+        """Create an instance from a LogRecord."""
+        raise NotImplementedError()
 
 
 @dataclass
-class Error:
+class Error(LogEventData):
+    event = LogEvent.ERROR
+
     exception: Optional[str] = None
     location: Optional[str] = None
     rule: Optional[str] = None
@@ -26,7 +48,9 @@ class Error:
 
 
 @dataclass
-class WorkflowStarted:
+class WorkflowStarted(LogEventData):
+    event = LogEvent.WORKFLOW_STARTED
+
     workflow_id: uuid.UUID
     snakefile: Optional[str]
 
@@ -47,7 +71,9 @@ class WorkflowStarted:
 
 
 @dataclass
-class JobInfo:
+class JobInfo(LogEventData):
+    event = LogEvent.JOB_INFO
+
     jobid: int
     rule_name: str
     threads: int
@@ -90,7 +116,9 @@ class JobInfo:
 
 
 @dataclass
-class JobStarted:
+class JobStarted(LogEventData):
+    event = LogEvent.JOB_STARTED
+
     job_ids: List[int]
 
     @classmethod
@@ -106,7 +134,9 @@ class JobStarted:
 
 
 @dataclass
-class JobFinished:
+class JobFinished(LogEventData):
+    event = LogEvent.JOB_FINISHED
+
     job_id: int
 
     @classmethod
@@ -115,7 +145,9 @@ class JobFinished:
 
 
 @dataclass
-class ShellCmd:
+class ShellCmd(LogEventData):
+    event = LogEvent.SHELLCMD
+
     jobid: int
     shellcmd: Optional[str] = None
     rule_name: Optional[str] = None
@@ -130,7 +162,9 @@ class ShellCmd:
 
 
 @dataclass
-class JobError:
+class JobError(LogEventData):
+    event = LogEvent.JOB_ERROR
+
     jobid: int
 
     @classmethod
@@ -141,7 +175,9 @@ class JobError:
 
 
 @dataclass
-class GroupInfo:
+class GroupInfo(LogEventData):
+    event = LogEvent.GROUP_INFO
+
     group_id: int
     jobs: List[Any] = field(default_factory=list)
 
@@ -153,7 +189,9 @@ class GroupInfo:
 
 
 @dataclass
-class GroupError:
+class GroupError(LogEventData):
+    event = LogEvent.GROUP_ERROR
+
     groupid: int
     aux_logs: List[Any] = field(default_factory=list)
     job_error_info: Dict[str, Any] = field(default_factory=dict)
@@ -168,7 +206,9 @@ class GroupError:
 
 
 @dataclass
-class ResourcesInfo:
+class ResourcesInfo(LogEventData):
+    event = LogEvent.RESOURCES_INFO
+
     nodes: Optional[List[str]] = None
     cores: Optional[int] = None
     provided_resources: Optional[Dict[str, Any]] = None
@@ -186,7 +226,9 @@ class ResourcesInfo:
 
 
 @dataclass
-class DebugDag:
+class DebugDag(LogEventData):
+    event = LogEvent.DEBUG_DAG
+
     status: Optional[str] = None
     job: Optional[Any] = None
     file: Optional[str] = None
@@ -203,7 +245,9 @@ class DebugDag:
 
 
 @dataclass
-class Progress:
+class Progress(LogEventData):
+    event = LogEvent.PROGRESS
+
     done: int
     total: int
 
@@ -213,7 +257,9 @@ class Progress:
 
 
 @dataclass
-class RuleGraph:
+class RuleGraph(LogEventData):
+    event = LogEvent.RULEGRAPH
+
     rulegraph: Dict[str, Any]
 
     @classmethod
@@ -222,7 +268,9 @@ class RuleGraph:
 
 
 @dataclass
-class RunInfo:
+class RunInfo(LogEventData):
+    event = LogEvent.RUN_INFO
+
     per_rule_job_counts: Dict[str, int] = field(default_factory=dict)
     total_job_count: int = 0
 
@@ -236,3 +284,27 @@ class RunInfo:
         return cls(
             per_rule_job_counts=per_rule_job_counts, total_job_count=total_job_count
         )
+
+
+#: Mapping from event types to their associated data classes.
+LOG_EVENT_CLASSES: Mapping[LogEvent, type[LogEventData]] = MappingProxyType(
+    {
+        cls.event: cls
+        for cls in [
+            Error,
+            WorkflowStarted,
+            JobInfo,
+            JobStarted,
+            JobFinished,
+            ShellCmd,
+            JobError,
+            GroupInfo,
+            GroupError,
+            ResourcesInfo,
+            DebugDag,
+            Progress,
+            RuleGraph,
+            RunInfo,
+        ]
+    }
+)
