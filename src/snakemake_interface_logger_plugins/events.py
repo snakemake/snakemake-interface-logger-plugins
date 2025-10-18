@@ -146,11 +146,9 @@ class ShellCmd(LogEventData):
 
     @classmethod
     def from_record(cls, record: LogRecord) -> "ShellCmd":
-        return cls(
-            jobid=getattr(record, "jobid", 0),
-            shellcmd=getattr(record, "shellcmd", ""),
-            rule_name=getattr(record, "name", None),
-        )
+        # Snakemake also inconsistently uses "cmd" instead of "shellcmd" in places
+        shellcmd = getattr(record, "shellcmd", None) or getattr(record, "cmd", None)
+        return _from_record_default(cls, record, shellcmd=shellcmd)
 
 
 @dataclass
