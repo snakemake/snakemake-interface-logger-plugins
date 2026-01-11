@@ -1,35 +1,73 @@
 import uuid
-from dataclasses import dataclass, field, fields, MISSING
+from dataclasses import Field, dataclass, field, fields, MISSING
 from logging import LogRecord
-from typing import Any, Optional, ClassVar, Self, Mapping, TypeVar, TypedDict
+from typing import Any, Optional, ClassVar, Self, Mapping, TypeVar, TypedDict, TypeAlias
 from types import MappingProxyType
 
 from .common import LogEvent
 
 
-T = TypeVar("T")
+_EventDataT = TypeVar("_EventDataT", bound="LogEventData")
+StrMap: TypeAlias = Mapping[str, Any]
 
 
-def _from_record_default(cls: type[T], record: LogRecord, **kw) -> T:
-    """Helper function to implement ``LogEventData.from_record()``.
+#################### Utils ####################
 
-    Gets attribute values from ``record`` for all fields in dataclass ``cls`` and passes them to the
-    ``cls`` constructor. Behavior can be overridden for specific fields by passing their values
-    as keyword arguments.
+
+def field_has_default(field: Field) -> bool:
+    """Check whether a dataclass field has a default value."""
+    return field.default is not MISSING or field.default_factory is not MISSING
+
+
+def is_namedlist(obj: Any) -> bool:
+    """Check whether an object is a Snakemake NamedList.
+
+    (Can't do an isinstance check without importing snakemake)
+    """
+    return isinstance(obj, list) and hasattr(obj, "_names")
+
+
+#################### Base class ####################
+
+
+def _from_extra_default(
+    cls: type[_EventDataT], extra: StrMap, /, **kw: Any
+) -> _EventDataT:
+    """Helper function to implement ``LogEventData._from_extra()``.
+
+    Picks values from ``extra`` for all fields in dataclass ``cls`` and passes them to the ``cls``
+    constructor. Behavior can be overridden for specific fields by passing their values as keyword
+    arguments.
     """
     for fld in fields(cls):
         if fld.name in kw:
             continue
-        if hasattr(record, fld.name):
-            kw[fld.name] = getattr(record, fld.name)
-        elif fld.default is MISSING and fld.default_factory is MISSING:
+        if fld.name in extra:
+            kw[fld.name] = extra[fld.name]
+        elif not field_has_default(fld):
             raise ValueError(f"LogRecord missing required attribute {fld.name!r}")
 
     return cls(**kw)
 
 
+@dataclass
 class LogEventData:
     """Data associated with a Snakemake log event.
+
+    This class and its subclasses are intended to be integrated directly into the main Snakemake
+    library, but the behavior of the :meth:`from_record()` and :meth:`extra()` methods are
+    designed to behave consistently before and after this happens.
+
+    Pre-integration: logging functions are called with a manually-constructed ``extra`` dictionary
+    of additional attributes to add to the ``LogRecord``. :meth:`from_record()` inspects the
+    ``event`` attribute and constructs an instance of the appropriate subclass using the record's
+    other attribute values.
+
+    Post-integration: logging code constructs an instance of the subclass directly and calls the
+    :meth:`extra()` method to obtain the ``extra`` dictionary to pass to logging functions. This
+    includes the instance itself under the ``event_data`` key (which should be the preferred way for
+    future code to access the data), but also includes all individual attributes for backward
+    compatibility.
 
     Attributes
     ----------
@@ -39,14 +77,63 @@ class LogEventData:
 
     event: ClassVar[LogEvent]
 
-    @classmethod
-    def from_record(cls, record: LogRecord) -> Self:
-        """Create an instance from a LogRecord."""
-        if cls is LogEventData:
+    def __init__(self) -> None:
+        # Allow super().__init__() in subclasses even if it doesn't do anything
+        if type(self) is LogEventData:
             raise TypeError(
-                f"{cls.__name__} is an abstract base class and cannot be instantiated."
+                f"{type(self).__name__} is an abstract base class and cannot be instantiated."
             )
-        return _from_record_default(cls, record)
+
+    @staticmethod
+    def from_record(record: LogRecord) -> "LogEventData":
+        """Create an instance from a LogRecord.
+
+        See :meth:`from_extra` for details.
+        """
+        return LogEventData.from_extra(record.__dict__)
+
+    @classmethod
+    def from_extra(cls, extra: StrMap) -> "LogEventData":
+        """Create from dictionary of extra log record attributes.
+
+        If ``extra`` has an ``'event_data'`` key, its value is returned directly. Otherwise selects
+        the appropriate subclass based on the ``'event'`` key/attribute.
+        """
+        event_data = extra.get("event_data", None)
+        if event_data is not None:
+            return event_data
+        event = extra.get("event", None)
+        if event is None:
+            raise ValueError("LogRecord missing required attribute 'event'")
+        cls = LOG_EVENT_CLASSES[event]
+        return cls._from_extra(extra)
+
+    @classmethod
+    def _from_extra(cls, extra: StrMap) -> Self:
+        """Subclass-specific implementation of ``from_extra()``."""
+        return _from_extra_default(cls, extra)
+
+    def extra(self, **kw: Any) -> dict[str, Any]:
+        """Convert to dictionary of extra log record attributes.
+
+        The result can be passed as the ``extra`` parameter of logging methods to add the
+        instance's attributes to the log record. Also includes the instance itself under
+        ``"event_data"`` and its ``LogEvent`` under ``"event"``.
+
+        Any additional keyword arguments are added to the resulting dictionary.
+        """
+        extra = self._extra()
+        extra["event"] = self.event
+        extra["event_data"] = self
+        extra.update(kw)
+        return extra
+
+    def _extra(self) -> dict[str, Any]:
+        """To be overridden by subclasses if needed."""
+        return {fld.name: getattr(self, fld.name) for fld in fields(self)}
+
+
+#################### Event classes ####################
 
 
 @dataclass
@@ -69,15 +156,15 @@ class WorkflowStarted(LogEventData):
     snakefile: Optional[str]
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> Self:
-        snakefile = getattr(record, "snakefile", None)
+    def _from_extra(cls, extra: StrMap) -> Self:
+        snakefile = extra.get("snakefile", None)
         if snakefile is not None:
             try:
                 # Try to convert to string - this should work for PosixPath and other path-like objects
                 snakefile = str(snakefile)
             except (TypeError, ValueError) as e:
                 raise ValueError(f"Could not convert snakefile to string: {e}")
-        return _from_record_default(cls, record, snakefile=snakefile)
+        return _from_extra_default(cls, extra, snakefile=snakefile)
 
 
 @dataclass
@@ -99,16 +186,25 @@ class JobInfo(LogEventData):
     resources: Optional[dict[str, Any]] = field(default_factory=dict)
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> Self:
-        resources = {}
-        if hasattr(record, "resources") and hasattr(record.resources, "_names"):  # type: ignore
-            resources = {
-                name: value
-                for name, value in zip(record.resources._names, record.resources)  # type: ignore
-                if name not in {"_cores", "_nodes"}
-            }
+    def _from_extra(cls, extra: StrMap) -> Self:
+        resources_obj = extra.get("resources", None)
 
-        return _from_record_default(cls, record, resources=resources)
+        if resources_obj is None:
+            resources = {}
+        elif is_namedlist(resources_obj):
+            resources = dict(resources_obj.items())
+        elif isinstance(resources_obj, Mapping):
+            resources = dict(resources_obj)
+        else:
+            raise TypeError("resources must be a Mapping, NamedList, or None")
+
+        resources = {
+            name: value
+            for name, value in resources.items()
+            if name not in {"_cores", "_nodes"}
+        }
+
+        return _from_extra_default(cls, extra, resources=resources)
 
 
 @dataclass
@@ -118,15 +214,18 @@ class JobStarted(LogEventData):
     job_ids: list[int]
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> Self:
-        jobs = getattr(record, "jobs", [])
+    def _from_extra(cls, extra: StrMap) -> Self:
+        if "job_ids" in extra:
+            job_ids = extra["job_ids"]
+        else:
+            job_ids = extra.get("jobs", [])
 
-        if jobs is None:
-            jobs = []
-        elif isinstance(jobs, int):
-            jobs = [jobs]
+            if job_ids is None:
+                job_ids = []
+            elif isinstance(job_ids, int):
+                job_ids = [job_ids]
 
-        return cls(job_ids=jobs)
+        return cls(job_ids=job_ids)
 
 
 @dataclass
@@ -145,10 +244,10 @@ class ShellCmd(LogEventData):
     rule_name: Optional[str] = None
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> "ShellCmd":
+    def _from_extra(cls, extra: StrMap) -> "ShellCmd":
         # Snakemake also inconsistently uses "cmd" instead of "shellcmd" in places
-        shellcmd = getattr(record, "shellcmd", None) or getattr(record, "cmd", None)
-        return _from_record_default(cls, record, shellcmd=shellcmd)
+        shellcmd = extra.get("shellcmd", None) or extra.get("cmd", None)
+        return _from_extra_default(cls, extra, shellcmd=shellcmd)
 
 
 @dataclass
@@ -300,19 +399,54 @@ class RunInfo(LogEventData):
 
     event = LogEvent.RUN_INFO
 
-    per_rule_job_counts: dict[str, int] = field(default_factory=dict)
-    total_job_count: int = 0
+    per_rule_job_counts: dict[str, int]
+    total_job_count: int
+
+    def __init__(
+        self,
+        per_rule_job_counts: dict[str, int] | None = None,
+        total_job_count: int | None = None,
+        stats: dict[str, int] | None = None,
+    ):
+        """
+        Parameters
+        ----------
+        per_rule_job_counts
+        total_job_count
+        stats
+            From :meth:`DAG.stats()`. Provides defaults for previous two parameters.
+        """
+        if per_rule_job_counts is not None:
+            self.per_rule_job_counts = per_rule_job_counts
+        elif stats is not None:
+            self.per_rule_job_counts = {k: v for k, v in stats.items() if k != "total"}
+        else:
+            self.per_rule_job_counts = {}
+
+        if total_job_count is not None:
+            self.total_job_count = total_job_count
+        elif stats is not None:
+            self.total_job_count = stats.get(
+                "total", sum(self.per_rule_job_counts.values())
+            )
+        else:
+            self.total_job_count = sum(self.per_rule_job_counts.values())
 
     @classmethod
-    def from_record(cls, record: LogRecord) -> "RunInfo":
-        all_stats = getattr(record, "stats", {})
-
-        per_rule_job_counts = {k: v for k, v in all_stats.items() if k != "total"}
-
-        total_job_count = all_stats.get("total", 0)
+    def _from_extra(cls, extra: StrMap) -> "RunInfo":
         return cls(
-            per_rule_job_counts=per_rule_job_counts, total_job_count=total_job_count
+            per_rule_job_counts=extra.get("per_rule_job_counts"),
+            total_job_count=extra.get("total_job_count"),
+            stats=extra.get("stats"),
         )
+
+    def _extra(self) -> dict[str, Any]:
+        extra = super()._extra()
+        # Add "stats" key for compatibility
+        stats = dict(self.per_rule_job_counts)
+        stats["total"] = self.total_job_count
+        extra["stats"] = stats
+        return extra
 
 
 #: Mapping from event types to their associated data classes.
