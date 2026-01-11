@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass, field, fields, MISSING
 from logging import LogRecord
-from typing import Any, Dict, List, Optional, ClassVar, Self, Mapping, TypeVar
+from typing import Any, Optional, ClassVar, Self, Mapping, TypeVar
 from types import MappingProxyType
 
 from .common import LogEvent
@@ -87,16 +87,16 @@ class JobInfo(LogEventData):
     jobid: int
     rule_name: str
     threads: int
-    input: Optional[List[str]] = None
-    output: Optional[List[str]] = None
-    log: Optional[List[str]] = None
-    benchmark: Optional[List[str]] = None
+    input: Optional[list[str]] = None
+    output: Optional[list[str]] = None
+    log: Optional[list[str]] = None
+    benchmark: Optional[list[str]] = None
     rule_msg: Optional[str] = None
-    wildcards: Optional[Dict[str, Any]] = field(default_factory=dict)
+    wildcards: Optional[dict[str, Any]] = field(default_factory=dict)
     reason: Optional[str] = None
     shellcmd: Optional[str] = None
     priority: Optional[int] = None
-    resources: Optional[Dict[str, Any]] = field(default_factory=dict)
+    resources: Optional[dict[str, Any]] = field(default_factory=dict)
 
     @classmethod
     def from_record(cls, record: LogRecord) -> Self:
@@ -115,7 +115,7 @@ class JobInfo(LogEventData):
 class JobStarted(LogEventData):
     event = LogEvent.JOB_STARTED
 
-    job_ids: List[int]
+    job_ids: list[int]
 
     @classmethod
     def from_record(cls, record: LogRecord) -> Self:
@@ -163,7 +163,7 @@ class GroupInfo(LogEventData):
     event = LogEvent.GROUP_INFO
 
     group_id: int
-    jobs: List[Any] = field(default_factory=list)
+    jobs: list[Any] = field(default_factory=list)
 
 
 @dataclass
@@ -171,17 +171,17 @@ class GroupError(LogEventData):
     event = LogEvent.GROUP_ERROR
 
     groupid: int
-    aux_logs: List[Any] = field(default_factory=list)
-    job_error_info: Dict[str, Any] = field(default_factory=dict)
+    aux_logs: list[Any] = field(default_factory=list)
+    job_error_info: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class ResourcesInfo(LogEventData):
     event = LogEvent.RESOURCES_INFO
 
-    nodes: Optional[List[str]] = None
+    nodes: Optional[list[str]] = None
     cores: Optional[int] = None
-    provided_resources: Optional[Dict[str, Any]] = None
+    provided_resources: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -206,14 +206,14 @@ class Progress(LogEventData):
 class RuleGraph(LogEventData):
     event = LogEvent.RULEGRAPH
 
-    rulegraph: Dict[str, Any]
+    rulegraph: dict[str, Any]
 
 
 @dataclass
 class RunInfo(LogEventData):
     event = LogEvent.RUN_INFO
 
-    per_rule_job_counts: Dict[str, int] = field(default_factory=dict)
+    per_rule_job_counts: dict[str, int] = field(default_factory=dict)
     total_job_count: int = 0
 
     @classmethod
