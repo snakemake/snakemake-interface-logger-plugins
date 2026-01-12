@@ -137,7 +137,7 @@ class LogEventData:
 
 
 @dataclass
-class Error(LogEventData):
+class ErrorEvent(LogEventData):
     event = LogEvent.ERROR
 
     exception: Optional[str] = None
@@ -149,7 +149,7 @@ class Error(LogEventData):
 
 
 @dataclass
-class WorkflowStarted(LogEventData):
+class WorkflowStartedEvent(LogEventData):
     event = LogEvent.WORKFLOW_STARTED
 
     workflow_id: uuid.UUID
@@ -168,7 +168,7 @@ class WorkflowStarted(LogEventData):
 
 
 @dataclass
-class JobInfo(LogEventData):
+class JobInfoEvent(LogEventData):
     event = LogEvent.JOB_INFO
 
     jobid: int
@@ -211,7 +211,7 @@ class JobInfo(LogEventData):
 
 
 @dataclass
-class JobStarted(LogEventData):
+class JobStartedEvent(LogEventData):
     event = LogEvent.JOB_STARTED
 
     job_ids: list[int]
@@ -232,14 +232,14 @@ class JobStarted(LogEventData):
 
 
 @dataclass
-class JobFinished(LogEventData):
+class JobFinishedEvent(LogEventData):
     event = LogEvent.JOB_FINISHED
 
     job_id: int
 
 
 @dataclass
-class ShellCmd(LogEventData):
+class ShellCmdEvent(LogEventData):
     event = LogEvent.SHELLCMD
 
     jobid: Optional[int] = None
@@ -247,21 +247,21 @@ class ShellCmd(LogEventData):
     rule_name: Optional[str] = None
 
     @classmethod
-    def _from_extra(cls, extra: StrMap) -> "ShellCmd":
+    def _from_extra(cls, extra: StrMap) -> "ShellCmdEvent":
         # Snakemake also inconsistently uses "cmd" instead of "shellcmd" in places
         shellcmd = extra.get("shellcmd", None) or extra.get("cmd", None)
         return _from_extra_default(cls, extra, shellcmd=shellcmd)
 
 
 @dataclass
-class JobError(LogEventData):
+class JobErrorEvent(LogEventData):
     event = LogEvent.JOB_ERROR
 
     jobid: int
 
 
 @dataclass
-class GroupInfo(LogEventData):
+class GroupInfoEvent(LogEventData):
     event = LogEvent.GROUP_INFO
 
     group_id: str
@@ -269,7 +269,7 @@ class GroupInfo(LogEventData):
 
 
 @dataclass
-class GroupError(LogEventData):
+class GroupErrorEvent(LogEventData):
     event = LogEvent.GROUP_ERROR
 
     groupid: str
@@ -278,7 +278,7 @@ class GroupError(LogEventData):
 
 
 @dataclass
-class ResourcesInfo(LogEventData):
+class ResourcesInfoEvent(LogEventData):
     """Information on resources available to workflow.
 
     This may be emitted multiple times at the beginning of the workflow, each time with only
@@ -303,7 +303,7 @@ class ResourcesInfo(LogEventData):
 
 
 @dataclass
-class DebugDag(LogEventData):
+class DebugDagEvent(LogEventData):
     event = LogEvent.DEBUG_DAG
 
     status: Optional[str] = None
@@ -313,7 +313,7 @@ class DebugDag(LogEventData):
 
 
 @dataclass
-class Progress(LogEventData):
+class ProgressEvent(LogEventData):
     """Progress of workflow execution.
 
     Attributes
@@ -375,7 +375,7 @@ class RuleGraphDict(TypedDict):
 
 
 @dataclass
-class RuleGraph(LogEventData):
+class RuleGraphEvent(LogEventData):
     """Dependency graph of rules for all jobs to be executed.
 
     This is only emitted if a logging plugin specifically requests it.
@@ -387,7 +387,7 @@ class RuleGraph(LogEventData):
 
 
 @dataclass
-class RunInfo(LogEventData):
+class RunInfoEvent(LogEventData):
     """Information on rules/jobs to be executed.
 
     Emitted prior to start of workflow execution or during a dry run.
@@ -436,7 +436,7 @@ class RunInfo(LogEventData):
             self.total_job_count = sum(self.per_rule_job_counts.values())
 
     @classmethod
-    def _from_extra(cls, extra: StrMap) -> "RunInfo":
+    def _from_extra(cls, extra: StrMap) -> "RunInfoEvent":
         return cls(
             per_rule_job_counts=extra.get("per_rule_job_counts"),
             total_job_count=extra.get("total_job_count"),
@@ -457,20 +457,20 @@ LOG_EVENT_CLASSES: Mapping[LogEvent, type[LogEventData]] = MappingProxyType(
     {
         cls.event: cls
         for cls in [
-            Error,
-            WorkflowStarted,
-            JobInfo,
-            JobStarted,
-            JobFinished,
-            ShellCmd,
-            JobError,
-            GroupInfo,
-            GroupError,
-            ResourcesInfo,
-            DebugDag,
-            Progress,
-            RuleGraph,
-            RunInfo,
+            ErrorEvent,
+            WorkflowStartedEvent,
+            JobInfoEvent,
+            JobStartedEvent,
+            JobFinishedEvent,
+            ShellCmdEvent,
+            JobErrorEvent,
+            GroupInfoEvent,
+            GroupErrorEvent,
+            ResourcesInfoEvent,
+            DebugDagEvent,
+            ProgressEvent,
+            RuleGraphEvent,
+            RunInfoEvent,
         ]
     }
 )
