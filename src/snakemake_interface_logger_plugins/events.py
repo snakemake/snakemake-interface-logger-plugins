@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass, field, fields, MISSING
 from logging import LogRecord
-from typing import Any, Optional, ClassVar, Self, Mapping, TypeVar
+from typing import Any, Optional, ClassVar, Self, Mapping, TypeVar, TypedDict
 from types import MappingProxyType
 
 from .common import LogEvent
@@ -177,6 +177,22 @@ class GroupError(LogEventData):
 
 @dataclass
 class ResourcesInfo(LogEventData):
+    """Information on resources available to workflow.
+
+    This may be emitted multiple times at the beginning of the workflow, each time with only
+    some or possible no attributes set.
+
+    Attributes
+    ----------
+    nodes
+        Number of provided remote nodes (see :attr:`Workflow.nodes`)
+    cores
+        Number of provided CPU cores.
+    provided_resources
+        Additional resources (see :attr:`Workflow.global_resources`,
+        :attr:`ResourceSettings.resources`).
+    """
+
     event = LogEvent.RESOURCES_INFO
 
     nodes: Optional[list[str]] = None
@@ -196,21 +212,92 @@ class DebugDag(LogEventData):
 
 @dataclass
 class Progress(LogEventData):
+    """Progress of workflow execution.
+
+    Attributes
+    ----------
+    done
+        Number of completed jobs.
+    total
+        Total number of jobs to be executed.
+    """
+
     event = LogEvent.PROGRESS
 
     done: int
     total: int
 
 
+class RuleGraphNode(TypedDict):
+    """
+    Attributes
+    ----------
+    rule
+        Name of rule.
+    """
+
+    rule: str
+
+
+class RuleGraphEdge(TypedDict):
+    """
+    Attributes
+    ----------
+    source
+        Index of source node in list.
+    target
+        Index of target node in list.
+    sourcerule
+        Name of source rule.
+    targetrule
+        Name of target rule.
+    """
+
+    source: int
+    target: int
+    sourcerule: str
+    targetrule: str
+
+
+class RuleGraphDict(TypedDict):
+    """Representation of the rule graph in ``RULEGRAPH`` event.
+
+    This is a graph where nodes correspond to unique rules for all jobs to be executed, and an
+    an edge is present from rule A to rule B if any job of rule A is a dependency of any job of rule
+    B. The nodes list is sorted according to a topological sort of the job graph, using the first
+    job for each rule.
+    """
+
+    nodes: list[RuleGraphNode]
+    edges: list[RuleGraphEdge]
+
+
 @dataclass
 class RuleGraph(LogEventData):
+    """Dependency graph of rules for all jobs to be executed.
+
+    This is only emitted if a logging plugin specifically requests it.
+    """
+
     event = LogEvent.RULEGRAPH
 
-    rulegraph: dict[str, Any]
+    rulegraph: RuleGraphDict
 
 
 @dataclass
 class RunInfo(LogEventData):
+    """Information on rules/jobs to be executed.
+
+    Emitted prior to start of workflow execution or during a dry run.
+
+    Attributes
+    ----------
+    per_rule_job_counts
+        Mapping from rule names to the number of jobs to be executed for each.
+    total_job_count
+        Total number of jobs to be executed.
+    """
+
     event = LogEvent.RUN_INFO
 
     per_rule_job_counts: dict[str, int] = field(default_factory=dict)
