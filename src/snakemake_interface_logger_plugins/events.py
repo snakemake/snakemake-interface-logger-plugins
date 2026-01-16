@@ -42,10 +42,11 @@ def _from_extra_default(
     for fld in fields(cls):
         if fld.name in kw:
             continue
-        if fld.name in extra:
-            kw[fld.name] = extra[fld.name]
+        name = fld.metadata.get("alias", fld.name)
+        if name in extra:
+            kw[fld.name] = extra[name]
         elif not field_has_default(fld):
-            raise ValueError(f"LogRecord missing required attribute {fld.name!r}")
+            raise ValueError(f"LogRecord missing required attribute {name!r}")
 
     return cls(**kw)
 
@@ -68,6 +69,11 @@ class LogEventData:
     includes the instance itself under the ``event_data`` key (which should be the preferred way for
     future code to access the data), but also includes all individual attributes for backward
     compatibility.
+
+    If fields have an ``alias`` key in their metadata, this is used in place of the field's name
+    when converting to and from the ``extra`` dictionary or a ``LogRecord`` instance. This provides
+    more consistent naming on the dataclasses while maintaining compatibility with existing logging
+    code that reads the old attribute names from the ``LogRecord``.
 
     Attributes
     ----------
@@ -130,7 +136,10 @@ class LogEventData:
 
     def _extra(self) -> dict[str, Any]:
         """To be overridden by subclasses if needed."""
-        return {fld.name: getattr(self, fld.name) for fld in fields(self)}
+        return {
+            fld.metadata.get("alias", fld.name): getattr(self, fld.name)
+            for fld in fields(self)
+        }
 
 
 #################### Event classes ####################
@@ -171,7 +180,7 @@ class WorkflowStartedEvent(LogEventData):
 class JobInfoEvent(LogEventData):
     event = LogEvent.JOB_INFO
 
-    jobid: int
+    job_id: int = field(metadata={"alias": "jobid"})
     rule_name: str
     threads: int
     input: Optional[list[str]] = None
@@ -214,21 +223,7 @@ class JobInfoEvent(LogEventData):
 class JobStartedEvent(LogEventData):
     event = LogEvent.JOB_STARTED
 
-    job_ids: list[int]
-
-    @classmethod
-    def _from_extra(cls, extra: StrMap) -> Self:
-        if "job_ids" in extra:
-            job_ids = extra["job_ids"]
-        else:
-            job_ids = extra.get("jobs", [])
-
-            if job_ids is None:
-                job_ids = []
-            elif isinstance(job_ids, int):
-                job_ids = [job_ids]
-
-        return cls(job_ids=job_ids)
+    job_ids: list[int] = field(metadata={"alias": "jobs"})
 
 
 @dataclass
@@ -242,7 +237,7 @@ class JobFinishedEvent(LogEventData):
 class ShellCmdEvent(LogEventData):
     event = LogEvent.SHELLCMD
 
-    jobid: Optional[int] = None
+    job_id: Optional[int] = field(default=None, metadata={"alias": "jobid"})
     shellcmd: Optional[str] = None
     rule_name: Optional[str] = None
 
@@ -257,7 +252,7 @@ class ShellCmdEvent(LogEventData):
 class JobErrorEvent(LogEventData):
     event = LogEvent.JOB_ERROR
 
-    jobid: int
+    job_id: int = field(metadata={"alias": "jobid"})
 
 
 @dataclass
@@ -272,7 +267,7 @@ class GroupInfoEvent(LogEventData):
 class GroupErrorEvent(LogEventData):
     event = LogEvent.GROUP_ERROR
 
-    groupid: str
+    group_id: str = field(metadata={"alias": "groupid"})
     aux_logs: list[Any] = field(default_factory=list)
     job_error_info: list[dict[str, Any]] = field(default_factory=list)
 

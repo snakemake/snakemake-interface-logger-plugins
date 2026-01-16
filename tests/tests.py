@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 from logging import Handler, LogRecord
 from typing import Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 import uuid
 
 import pytest
@@ -108,7 +108,7 @@ class TestEvents:
             snakefile="/path/to/Snakefile",
         ),
         logevents.JobInfoEvent(
-            jobid=123,
+            job_id=123,
             rule_name="example_rule",
             threads=4,
             input=["input1.txt", "input2.txt"],
@@ -117,21 +117,21 @@ class TestEvents:
             benchmark="benchmark.csv",
             wildcards={"foo": "bar"},
         ),
-        logevents.JobErrorEvent(jobid=123),
+        logevents.JobErrorEvent(job_id=123),
         logevents.JobStartedEvent(job_ids=[123, 321]),
         logevents.JobFinishedEvent(job_id=123),
         logevents.ShellCmdEvent(
-            jobid=123,
+            job_id=123,
             shellcmd="echo 'Hello, World!'",
             rule_name="example_rule",
         ),
-        logevents.JobErrorEvent(jobid=123),
+        logevents.JobErrorEvent(job_id=123),
         logevents.GroupInfoEvent(
             group_id="group1",
             jobs=[object(), object()],  # TODO: Actually mock job objects?
         ),
         logevents.GroupErrorEvent(
-            groupid="group1",
+            group_id="group1",
         ),
         logevents.ResourcesInfoEvent(
             nodes=["node1", "node2"],
@@ -184,6 +184,13 @@ class TestEvents:
             assert extra["event"] == data.event.value
             assert extra["event_data"] is data
             assert extra["_foo"] == "bar"
+
+            # Check aliases applied
+            for fld in fields(data):
+                alias = fld.metadata.get("alias")
+                if alias is not None:
+                    assert extra[alias] == getattr(data, fld.name)
+                    assert fld.name not in extra
 
             # Should return value of event_data key if present
             assert logevents.LogEventData.from_extra(extra) is data
