@@ -211,6 +211,10 @@ class TestEvents:
             extra3["event"] = data.event.value
             assert logevents.LogEventData.from_extra(extra3) == data
 
+        # No event
+        assert logevents.LogEventData.from_extra({}) is None
+        assert logevents.LogEventData.from_record(self._make_record("test", {})) is None
+
     def test_class_mapping(self):
         """Test that all LogEventData subclasses are registered in the mapping from LogEvent values."""
 

@@ -91,26 +91,36 @@ class LogEventData:
             )
 
     @staticmethod
-    def from_record(record: LogRecord) -> "LogEventData":
+    def from_record(record: LogRecord) -> "LogEventData | None":
         """Create an instance from a LogRecord.
 
-        See :meth:`from_extra` for details.
+        See :meth:`from_extra` for details. Returns ``None`` if record does not have an
+        event attached.
         """
         return LogEventData.from_extra(record.__dict__)
 
     @classmethod
-    def from_extra(cls, extra: StrMap) -> "LogEventData":
+    def from_extra(cls, extra: StrMap) -> "LogEventData | None":
         """Create from dictionary of extra log record attributes.
 
         If ``extra`` has an ``'event_data'`` key, its value is returned directly. Otherwise selects
-        the appropriate subclass based on the ``'event'`` key/attribute.
+        the appropriate subclass based on the ``'event'`` key/attribute. Returns None if no event
+        is present.
         """
         event_data = extra.get("event_data", None)
         if event_data is not None:
             return event_data
+
         event = extra.get("event", None)
         if event is None:
-            raise ValueError("LogRecord missing required attribute 'event'")
+            return None
+
+        # Ensure event is a LogEvent (also convert plain strings)
+        try:
+            event = LogEvent(event)
+        except ValueError:
+            return None
+
         cls = LOG_EVENT_CLASSES[event]
         return cls._from_extra(extra)
 
