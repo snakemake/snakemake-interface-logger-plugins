@@ -177,13 +177,16 @@ class JobInfo(LogEventData):
     input: Optional[list[str]] = None
     output: Optional[list[str]] = None
     log: Optional[list[str]] = None
-    benchmark: Optional[list[str]] = None
+    benchmark: Optional[str] = None
     rule_msg: Optional[str] = None
     wildcards: Optional[dict[str, Any]] = field(default_factory=dict)
     reason: Optional[str] = None
     shellcmd: Optional[str] = None
     priority: Optional[int] = None
     resources: Optional[dict[str, Any]] = field(default_factory=dict)
+    local: Optional[bool] = None
+    is_checkpoint: Optional[bool] = None
+    is_handover: Optional[bool] = None
 
     @classmethod
     def _from_extra(cls, extra: StrMap) -> Self:
@@ -239,7 +242,7 @@ class JobFinished(LogEventData):
 class ShellCmd(LogEventData):
     event = LogEvent.SHELLCMD
 
-    jobid: int
+    jobid: Optional[int] = None
     shellcmd: Optional[str] = None
     rule_name: Optional[str] = None
 
@@ -261,7 +264,7 @@ class JobError(LogEventData):
 class GroupInfo(LogEventData):
     event = LogEvent.GROUP_INFO
 
-    group_id: int
+    group_id: str
     jobs: list[Any] = field(default_factory=list)
 
 
@@ -269,9 +272,9 @@ class GroupInfo(LogEventData):
 class GroupError(LogEventData):
     event = LogEvent.GROUP_ERROR
 
-    groupid: int
+    groupid: str
     aux_logs: list[Any] = field(default_factory=list)
-    job_error_info: dict[str, Any] = field(default_factory=dict)
+    job_error_info: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -306,7 +309,7 @@ class DebugDag(LogEventData):
     status: Optional[str] = None
     job: Optional[Any] = None
     file: Optional[str] = None
-    exception: Optional[str] = None
+    exception: Optional[BaseException] = None
 
 
 @dataclass
