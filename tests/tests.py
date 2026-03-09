@@ -17,6 +17,7 @@ from snakemake_interface_logger_plugins.registry.plugin import Plugin
 from snakemake_interface_logger_plugins.common import LogEvent
 import snakemake_interface_logger_plugins.events as logevents
 
+from snakemake_logger_plugin_rich import RichLogHandler
 
 @dataclass
 class MockRichSettings(LogHandlerSettingsBase):
