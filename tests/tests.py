@@ -1,5 +1,4 @@
-from unittest.mock import MagicMock
-from logging import Handler, LogRecord
+from logging import LogRecord
 from typing import Optional, Any
 from dataclasses import dataclass, field, fields
 import uuid
