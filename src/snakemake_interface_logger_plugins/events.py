@@ -460,7 +460,7 @@ class RunInfoEvent(LogEventData):
 #: Mapping from event types to their associated data classes.
 LOG_EVENT_CLASSES: Mapping[LogEvent, type[LogEventData]] = MappingProxyType(
     {
-        cls.event: cls
+        getattr(cls, "event"): cls
         for cls in [
             ErrorEvent,
             WorkflowStartedEvent,
