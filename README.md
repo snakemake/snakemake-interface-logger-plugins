@@ -21,55 +21,25 @@ class LogHandlerSettings(LogHandlerSettingsBase):
         default=None,
         metadata={
             "help": "Some help text",
-            # Optionally request that setting is also available for specification
-            # via an environment variable. The variable will be named automatically as
-            # SNAKEMAKE_LOGGER_<LOGGER-name>_<param-name>, all upper case.
-            # This mechanism should ONLY be used for passwords and usernames.
-            # For other items, we rather recommend to let people use a profile
-            # for setting defaults
-            # (https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles).
-            "env_var": False,
-            # Optionally specify a function that parses the value given by the user.
-            # This is useful to create complex types from the user input.
-            "parse_func": ...,
-            # If a parse_func is specified, you also have to specify an unparse_func
-            # that converts the parsed value back to a string.
-            "unparse_func": ...,
-            # Optionally specify that setting is required when the LOGGER is in use.
             "required": True,
-            # Optionally specify multiple args with "nargs": "+"
         },
     )
 
 
 class LogHandler(LogHandlerBase):
     def __post_init__(self) -> None:
-        # initialize additional attributes
-        # Do not overwrite the __init__ method as this is kept in control of the base
-        # class in order to simplify the update process.
-        # See https://github.com/snakemake/snakemake-interface-logger-plugins/blob/main/src/snakemake_interface_logger_plugins/base.py # noqa: E501
-        # for attributes of the base class.
-        # In particular, the settings of above LogHandlerSettings class are accessible via
-        # self.settings.
-        # You also have access to self.common_settings here, which are logging settings supplied by the caller in the form of OutputSettingsLoggerInterface. # noqa: E501
-        # See https://github.com/snakemake/snakemake-interface-logger-plugins/blob/main/src/snakemake_interface_logger_plugins/settings.py for more details # noqa: E501
+        # Perform additional setup here
 
-        # access settings attributes
+        # LogHandlerSettings instance:
         self.settings
+        # General settings:
         self.common_settings
 
     # Here you can override logging.Handler methods to customize logging behavior.
-    # Only an implementation of the emit() method is required. See the Python logging
-    # documentation for details:
-    # https://docs.python.org/3/library/logging.html#handler-objects
-
-    # LogRecords from Snakemake carry contextual information in the record's attributes
-    # Of particular interest is the 'event' attribute, which indicates the type of log information contained
-    # See https://github.com/snakemake/snakemake-interface-logger-plugins/blob/2ab84cb31f0b92cf0b7ee3026e15d1209729d197/src/snakemake_interface_logger_plugins/common.py#L33 # noqa: E501
-    # For examples on parsing LogRecords, see https://github.com/cademirch/snakemake-logger-plugin-snkmt/blob/main/src/snakemake_logger_plugin_snkmt/parsers.py # noqa: E501
+    # Only an implementation of the emit() method is required.
 
     def emit(self, record):
-        # Actually emit the record. Typically this will call self.format(record) to
+        # Emit the record. Typically this will call self.format(record) to
         # convert the record to a formatted string. The result could then be written to
         # a stream or file.
         ...
@@ -77,43 +47,138 @@ class LogHandler(LogHandlerBase):
     @property
     def writes_to_stream(self) -> bool:
         # Whether this plugin writes to stderr/stdout.
-        # If your plugin writes to stderr/stdout, return
-        # true so that Snakemake disables its stderr logging.
         ...
 
     @property
     def writes_to_file(self) -> bool:
         # Whether this plugin writes to a file.
-        # If your plugin writes log output to a file, return
-        # true so that Snakemake can report your logfile path at workflow end.
-        # NOTE: Handlers that return True must provide a baseFilename attribute
-        # containing the file path. 
         ...
 
     @property
     def has_filter(self) -> bool:
         # Whether this plugin attaches its own filter.
-        # Return true if your plugin provides custom log filtering logic.
-        # If false is returned, Snakemake's DefaultFilter will be attached see: https://github.com/snakemake/snakemake/blob/960f6a89eaa31da6014e810dfcf08f635ac03a6e/src/snakemake/logging.py#L372 # noqa: E501
-        # See https://docs.python.org/3/library/logging.html#filter-objects for info on how to define and attach a Filter
         ...
 
     @property
     def has_formatter(self) -> bool:
         # Whether this plugin attaches its own formatter.
-        # Return true if your plugin provides custom log formatting logic.
-        # If false is returned, Snakemake's Defaultformatter will be attached see: https://github.com/snakemake/snakemake/blob/960f6a89eaa31da6014e810dfcf08f635ac03a6e/src/snakemake/logging.py#L132 # noqa: E501
-        # See https://docs.python.org/3/library/logging.html#formatter-objects for info on how to define and attach a Formatter
         ...
 
     @property
     def needs_rulegraph(self) -> bool:
         # Whether this plugin requires the DAG rulegraph.
-        # Return true if your plugin needs access to the workflow's
-        # directed acyclic graph for logging purposes.
         ...
 
 ```
+
+
+## Instructions
+
+Assume your plugin is named "\<plugin\>":
+
+### Plugin registration
+
+In order for the plugin to be recognized by the registry, your package must be named
+`snakemake-logger-plugin-<plugin>` with importable root module
+`snakemake_logger_plugin_<plugin>`. The root module must contain a `LogHandlerSettings`
+and `LogHandler` class (see below).
+
+The logger can be used by passing `--logger <plugin>` to the `snakemake` command.
+
+### Settings class
+
+Create a subclass of
+`snakemake_interface_logger_plugins.settings.LogHandlerSettingsBase` named
+`LogHandlerSettings` (the `@dataclass` decorator is required). Its fields correspond to
+CLI options that can be used to configure the plugin (a field with name "\<field\>"
+corresponds to `--logger-<plugin>-<field>`).
+
+All fields must have a default value and type annotation (e.g. `str`, `int`, `bool`,
+possibly wrapped in `Optional`). To additionally customize the behavior of the CLI
+option, you can pass a dictionary to the `metadata` argument of `dataclasses.field()`.
+An incomplete list of recognized keys are:
+
+- `help` (`str`): Help text.
+- `required` (`bool`, default `False`): Whether the CLI option is required when using
+  the logger.
+- `env_var` (`bool`): Optionally request that setting is also available for
+  specification via an environment variable. The variable will be named automatically as
+  `SNAKEMAKE_LOGGER_<plugin>_<field>` (all upper case). This mechanism should ONLY be
+  used for passwords and usernames. For other items, we rather recommend to let people
+  use a
+  [profile](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles) for
+  setting defaults.
+- `parse_func` (function): Optionally specify a function that parses the value given by
+  the user. This is useful to create complex types from the user input.
+- `unparse_func` (function): Function that converts the parsed value back to a string.
+  Required if `parse_func` is specified.
+- `nargs` (`int` or `"+"`): Optionally specify multiple args with `"+"`.
+
+### Handler class
+
+Create a subclass of
+[`snakemake_interface_logger_plugins.base.LogHandlerBase`](https://github.com/snakemake/snakemake-interface-logger-plugins/blob/main/src/snakemake_interface_logger_plugins/base.py)
+named `LogHandler`.
+
+This is a subclass of [`logging.Handler`](https://docs.python.org/3/library/logging.html#handler-objects) and requires an implementation of the `emit()` method.
+
+`LogRecord`s from Snakemake carry contextual information in the record's attributes Of
+particular interest is the `event` attribute, which indicates the type of log
+information contained (see the
+[LogEvent](https://github.com/snakemake/snakemake-interface-logger-plugins/blob/2ab84cb31f0b92cf0b7ee3026e15d1209729d197/src/snakemake_interface_logger_plugins/common.py#L33)
+enum). For examples on parsing LogRecords, see the
+[snkmt](https://github.com/cademirch/snakemake-logger-plugin-snkmt/blob/main/src/snakemake_logger_plugin_snkmt/parsers.py)
+plugin.
+
+Do not overwrite the `__init__()` method as this is kept in control of the base class in
+order to simplify the update process. Instead, perform any additional initialization by
+overriding `__post_init__()`. for attributes of the base class. In particular, the
+`LogHandlerSettings` instance is accessible via `self.settings`. You also have access to
+`self.common_settings` here, which are logging settings supplied by the caller in the
+form of
+[`OutputSettingsLoggerInterface`](https://github.com/snakemake/snakemake-interface-logger-plugins/blob/main/src/snakemake_interface_logger_plugins/settings.py).
+
+Additionally, you will need to implement the following properties:
+
+- `writes_to_stream` (`bool`): Whether this plugin writes to stderr/stdout. This will
+  cause Snakemake to disable its standard logging to stderr.
+- `writes_to_file` (`bool`): Whether this plugin writes to a file. If it returns `True`,
+  your handler class must also have a `baseFilename` attribute containing the path of
+  the file written to. This is only used by Snakemake to report your logfile path when
+  the workflow is completed.
+- `has_filter` (`bool`): Whether this plugin attaches its own filter. Return true if
+  your plugin provides custom log filtering logic. If false is returned, Snakemake's
+  [DefaultFilter](https://docs.python.org/3/library/logging.html#logging.Handler) will
+  be attached. See Python's
+  [documentation](https://docs.python.org/3/library/logging.html#filter-objects) for
+  info on how to define and attach a `Filter`.
+- `has_formatter` (`bool`): Whether this plugin attaches its own formatter. Return true
+  if your plugin provides custom log formatting logic. If false is returned, Snakemake's
+  [Defaultformatter](https://docs.python.org/3/library/logging.html#logging.Handler)
+  will be attached. See Python's
+  [documentation](https://docs.python.org/3/library/logging.html#formatter-objects) for
+  info on how to define and attach a `Formatter`.
+- `needs_rulegraph` (`bool`): Whether this plugin requires the DAG rulegraph. Return
+  true if your plugin needs access to the workflow's directed acyclic graph for logging
+  purposes. This will cause Snakemake to event a `RULEGRAPH` log event.
+
+
+## Plugin setup process
+
+Snakemake uses the following process to set up the plugin when it is activated with the
+`--logger` option:
+
+1. An instance of the plugin's settings class is instantiated based on the remaining
+  CLI arguments.
+1. The handler class is instantiated:
+    1. The `settings` attribute is set to the instance of the plugin's settings class.
+    1. The `common_settings` attribute is set to an instance of the common settings
+       class.
+    1. The `__post_init__()` method is called.
+1. If the `has_filter` property is false, attach a `DefaultFilter` instance.
+1. If the `has_formatter` property is false, attach a `DefaultFormatter` instance.
+1. Install the handler so it can start processing events from the workflow.
+
 
 ## Migrating from `--log-handler-script`
 
@@ -206,6 +271,7 @@ class LogHandler(LogHandlerBase):
 4. **Error handling:** Add proper exception handling for file operations
 
 5. **Property configuration:** Set the abstract properties to inform Snakemake about your handler's behavior
+
 
 ## Available Log Events
 
