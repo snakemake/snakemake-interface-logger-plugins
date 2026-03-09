@@ -19,8 +19,8 @@ import snakemake_interface_logger_plugins.events as logevents
 
 
 @dataclass
-class MockSettings(LogHandlerSettingsBase):
-    """Mock settings for the logger plugin."""
+class MockRichSettings(LogHandlerSettingsBase):
+    """Mock settings for the rich logger plugin."""
 
     log_level: Optional[str] = field(
         default=None,
@@ -30,31 +30,6 @@ class MockSettings(LogHandlerSettingsBase):
             "required": False,
         },
     )
-
-
-class MockPlugin(LogHandlerBase):
-    settings_cls = MockSettings  # Use our mock settings class
-
-    def __init__(self, settings: Optional[LogHandlerSettingsBase] = None):
-        if settings is None:
-            settings = MockSettings()  # Provide default mock settings
-        super().__init__(settings)
-
-    def create_handler(
-        self,
-        quiet,
-        printshellcmds: bool,
-        printreason: bool,
-        debug_dag: bool,
-        nocolor: bool,
-        stdout: bool,
-        debug: bool,
-        mode,
-        show_failed_logs: bool,
-        dryrun: bool,
-    ) -> Handler:
-        """Mock logging handler."""
-        return MagicMock(spec=Handler)
 
 
 class TestRegistry(TestRegistryBase):
@@ -70,11 +45,11 @@ class TestRegistry(TestRegistryBase):
         registry = LoggerPluginRegistry()
         registry.plugins = {
             "rich": Plugin(
-                log_handler=MockPlugin,
-                _logger_settings_cls=MockSettings,
+                log_handler=RichLogHandler,
+                _logger_settings_cls=MockRichSettings,
                 _name="rich",
             )
-        }  # Inject the mock plugin
+        }  # Inject the rich plugin
 
         monkeypatch.setattr(self, "get_registry", lambda: registry)
 
@@ -85,12 +60,14 @@ class TestRegistry(TestRegistryBase):
         return "rich"
 
     def validate_plugin(self, plugin: LogHandlerBase):
-        assert plugin.settings_cls is MockSettings  # Ensure settings class is correct
+        assert (
+            plugin.settings_cls is MockRichSettings
+        )  # Ensure settings class is correct
 
     def validate_settings(
         self, settings: LogHandlerSettingsBase, plugin: LogHandlerBase
     ):
-        assert isinstance(settings, MockSettings)
+        assert isinstance(settings, MockRichSettings)
         assert settings.log_level == "info"
 
     def get_example_args(self):

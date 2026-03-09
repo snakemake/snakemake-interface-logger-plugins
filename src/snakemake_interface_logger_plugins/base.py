@@ -9,7 +9,7 @@ from snakemake_interface_logger_plugins.settings import (
     OutputSettingsLoggerInterface,
 )
 from abc import ABC, abstractmethod
-from logging import Handler
+from logging import Handler, LogRecord
 
 
 class LogHandlerBase(ABC, Handler):
@@ -18,6 +18,7 @@ class LogHandlerBase(ABC, Handler):
         common_settings: OutputSettingsLoggerInterface,
         settings: Optional[LogHandlerSettingsBase],
     ) -> None:
+        Handler.__init__(self)
         self.common_settings = common_settings
         self.settings = settings
         self.__post_init__()
@@ -26,6 +27,13 @@ class LogHandlerBase(ABC, Handler):
 
     def __post_init__(self) -> None:
         pass
+
+    @abstractmethod
+    def emit(self, record: LogRecord) -> None:
+        """Actually log the given record.
+
+        This is called after the record has passed the handler's installed filter.
+        """
 
     @property
     @abstractmethod

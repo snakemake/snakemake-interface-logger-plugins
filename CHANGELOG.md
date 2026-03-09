@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.0.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.5...v2.0.0) (2025-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* All LogHandlerBase subclasses must now implement the emit() method.
+
+### Features
+
+* Add test baseclass ([#39](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/39)) ([1b4f2b2](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/1b4f2b29e5bd28d9a079cc51fe56dffe3089dbe1))
+
+
+### Bug Fixes
+
+* require emit() method implementation in LogHandlerBase ([#41](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/41)) ([f3d56fe](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/f3d56fee72902734797f9ae9b81afabbeb2631c9))
+
+## [1.2.5](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.4...v1.2.5) (2025-09-28)
+
+
+### Bug Fixes
+
+* call logging.Handler init in base class ([#34](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/34)) ([a3bd247](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/a3bd247824f2800e454730b82001f826ad073799))
+* Require emit() method implementation ([#35](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/35)) ([71e6372](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/71e6372d5c5a3a895de47d41015553987d044103))
+
+
+### Documentation
+
+* add basefilename requirement ([#38](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/38)) ([38d2993](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/38d29934521734fc16f97a4505a0c88361075bdd)), closes [#37](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/37)
+
 ## [1.2.4](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v1.2.3...v1.2.4) (2025-06-05)
 
 
