@@ -42,11 +42,13 @@ def _from_extra_default(
     for fld in fields(cls):
         if fld.name in kw:
             continue
-        name = fld.metadata.get("alias", fld.name)
-        if name in extra:
-            kw[fld.name] = extra[name]
+        alias = fld.metadata.get("alias")
+        if fld.name in extra:
+            kw[fld.name] = extra[fld.name]
+        elif alias and alias in extra:
+            kw[fld.name] = extra[alias]
         elif not field_has_default(fld):
-            raise ValueError(f"LogRecord missing required attribute {name!r}")
+            raise ValueError(f"LogRecord missing required attribute {fld.name!r}")
 
     return cls(**kw)
 
@@ -240,7 +242,7 @@ class JobStartedEvent(LogEventData):
 class JobFinishedEvent(LogEventData):
     event = LogEvent.JOB_FINISHED
 
-    job_id: int
+    job_id: int = field(metadata={"alias": "jobid"})
 
 
 @dataclass
@@ -269,7 +271,7 @@ class JobErrorEvent(LogEventData):
 class GroupInfoEvent(LogEventData):
     event = LogEvent.GROUP_INFO
 
-    group_id: str
+    group_id: str = field(metadata={"alias": "groupid"})
     jobs: list[Any] = field(default_factory=list)
 
 
@@ -302,7 +304,7 @@ class ResourcesInfoEvent(LogEventData):
 
     event = LogEvent.RESOURCES_INFO
 
-    nodes: Optional[list[str]] = None
+    nodes: Optional[int] = None
     cores: Optional[int] = None
     provided_resources: Optional[dict[str, Any]] = None
 

@@ -111,7 +111,7 @@ class TestEvents:
             group_id="group1",
         ),
         logevents.ResourcesInfoEvent(
-            nodes=["node1", "node2"],
+            nodes=2,
             cores=16,
         ),
         logevents.DebugDagEvent(
