@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v2.0.1...v2.1.0) (2026-03-20)
+
+
+### Features
+
+* add tests for log events ([#50](https://github.com/snakemake/snakemake-interface-logger-plugins/issues/50)) ([b403ead](https://github.com/snakemake/snakemake-interface-logger-plugins/commit/b403eadc1d64a974ca6719cbc5f6a85f293a715f))
+
 ## [2.0.1](https://github.com/snakemake/snakemake-interface-logger-plugins/compare/v2.0.0...v2.0.1) (2026-03-09)
 
 
