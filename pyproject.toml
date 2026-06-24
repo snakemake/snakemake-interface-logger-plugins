@@ -33,7 +33,6 @@ mypy = ">=1.15.0,<2"
 pytest-cov = ">=6.0.0,<7"
 
 [tool.pixi.feature.dev.pypi-dependencies]
-snakemake-interface-common = { git = "https://github.com/snakemake/snakemake-interface-common.git" }
 snakemake_logger_plugin_rich = {git = "https://github.com/cademirch/snakemake-logger-plugin-rich.git"}
 
 [tool.mypy]
