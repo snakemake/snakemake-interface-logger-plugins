@@ -80,7 +80,7 @@ class TestLogHandlerBase(ABC):
         ...
 
     @abstractmethod
-    def get_log_handler_settings(self) -> LogHandlerSettingsBase:
+    def get_log_handler_settings(self) -> Optional[LogHandlerSettingsBase]:
         """Return the settings for the log handler.
 
         Returns:
